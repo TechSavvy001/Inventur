@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste bearbeiten</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <?php
+    session_start();
+    if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+        header('Location: login.php');
+        exit;
+    }
+
+    include 'config.php';
+
+    // Liste ID abrufen
+    $id = $_GET['id'];
+
+    // SQL-Abfrage zum Abrufen der Listendaten
+    $sql = "SELECT * FROM listen WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $list = $result->fetch_assoc();
+
+    // SQL-Abfrage zum Abrufen der Fahrzeugdaten
+    $sql = "SELECT * FROM fahrzeuge WHERE liste_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $vehicles = $stmt->get_result();
+    ?>
+
+    <div class="container mt-5">
+        <div class="menubar bg-white shadow-sm py-2 px-4">
+            <h1 class="h4">Liste bearbeiten</h1>
+        </div>
+
+        <div class="content bg-white p-4 rounded shadow-sm mt-4">
+            <form action="update_list.php" method="post">
+                <input type="hidden" name="id" value="<?php echo $list['id']; ?>">
+                <div class="form-group mb-3">
+                    <label for="ansager">Ansager:</label>
+                    <input type="text" class="form-control" id="ansager" name="ansager" value="<?php echo htmlspecialchars($list['ansager']); ?>" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="schreiber">Schreiber:</label>
+                    <input type="text" class="form-control" id="schreiber" name="schreiber" value="<?php echo htmlspecialchars($list['schreiber']); ?>" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="filiale">Filiale:</label>
+                    <input type="text" class="form-control" id="filiale" name="filiale" value="<?php echo htmlspecialchars($list['filiale']); ?>" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Speichern</button>
+                <a href="listen_bearbeiten.php" class="btn btn-secondary">Go Back</a>
+            </form>
+        </div>
+
+        <div class="content bg-white p-4 rounded shadow-sm mt-4">
+            <h2>Fahrzeuge in dieser Liste</h2>
+            <?php if ($vehicles->num_rows > 0): ?>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Barcode</th>
+                                <th>Barcode 8-stellig</th>
+                                <th>Abteilung</th>
+                                <th>Fahrgestellnummer</th>
+                                <th>Marke</th>
+                                <th>Modell</th>
+                                <th>Farbe</th>
+                                <th>Aufnahmebereich</th>
+                                <th>Bild Nummer</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($vehicle = $vehicles->fetch_assoc()): ?>
+                                <tr>
+                                    <form class="vehicle-form">
+                                        <td><input type="text" class="form-control" name="barcode" value="<?php echo htmlspecialchars($vehicle['barcode']); ?>"></td>
+                                        <td><input type="text" class="form-control" name="barcode8" value="<?php echo htmlspecialchars($vehicle['barcode8']); ?>"></td>
+                                        <td>
+                                            <select name="abteilung" class="form-control">
+                                                <option value="neuwagen" <?php if ($vehicle['abteilung'] == 'neuwagen') echo 'selected'; ?>>Neuwagen</option>
+                                                <option value="gebrauchtwagen" <?php if ($vehicle['abteilung'] == 'gebrauchtwagen') echo 'selected'; ?>>Gebrauchtwagen</option>
+                                                <option value="großkunden" <?php if ($vehicle['abteilung'] == 'großkunden') echo 'selected'; ?>>Großkunden</option>
+                                                <option value="fremdesEigentum" <?php if ($vehicle['abteilung'] == 'fremdesEigentum') echo 'selected'; ?>>Fremdes Eigentum</option>
+                                                <option value="bmc" <?php if ($vehicle['abteilung'] == 'bmc') echo 'selected'; ?>>BMW</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control" name="fgNummer" value="<?php echo htmlspecialchars($vehicle['fgNummer']); ?>"></td>
+                                        <td><input type="text" class="form-control" name="marke" value="<?php echo htmlspecialchars($vehicle['marke']); ?>"></td>
+                                        <td><input type="text" class="form-control" name="modell" value="<?php echo htmlspecialchars($vehicle['modell']); ?>"></td>
+                                        <td><input type="text" class="form-control" name="farbe" value="<?php echo htmlspecialchars($vehicle['farbe']); ?>"></td>
+                                        <td><input type="text" class="form-control" name="aufnahmebereich" value="<?php echo htmlspecialchars($vehicle['aufnahmebereich']); ?>"></td>
+                                        <td><input type="text" class="form-control" name="bildNummer" value="<?php echo htmlspecialchars($vehicle['bildNummer']); ?>"></td>
+                                        <td>
+                                            <input type="hidden" name="id" value="<?php echo $vehicle['id']; ?>">
+                                            <input type="hidden" name="liste_id" value="<?php echo $id; ?>">
+                                            <button type="submit" class="btn btn-success btn-sm">Speichern</button>
+                                        </td>
+                                    </form>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <p class="alert alert-warning">Keine Fahrzeuge in dieser Liste gefunden.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const forms = document.querySelectorAll(".vehicle-form");
+            forms.forEach(function(form) {
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault(); // Verhindert das Standardformularverhalten
+
+                    const formData = new FormData(form);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", "update_vehicle.php", true);
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            alert("Fahrzeug erfolgreich aktualisiert");
+                        } else {
+                            alert("Fehler beim Aktualisieren des Fahrzeugs");
+                        }
+                    };
+                    xhr.send(formData);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
