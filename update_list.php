@@ -8,13 +8,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ansager = $_POST['ansager'];
     $schreiber = $_POST['schreiber'];
     $filiale = $_POST['filiale'];
+    
+    // Überprüfen, von welcher Seite die Anfrage kam
+    $previous_page = $_POST['previous_page'];
 
     // SQL-Abfrage zum Aktualisieren der Daten
     $stmt = $conn->prepare("UPDATE listen SET ansager = ?, schreiber = ?, filiale = ? WHERE id = ?");
     $stmt->bind_param("sssi", $ansager, $schreiber, $filiale, $id);
 
     if ($stmt->execute() === TRUE) {
-        header("Location: listen_bearbeiten.php");
+        // Zurück zur vorherigen Seite
+        header("Location: $previous_page?liste_id=$id");
         exit();
     } else {
         echo "Fehler: " . $stmt->error;

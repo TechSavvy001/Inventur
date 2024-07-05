@@ -9,7 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css.css">
+    <style>
+        .alert-success {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -39,6 +44,9 @@
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $vehicles = $stmt->get_result();
+    
+    // Vorherige Seite abrufen
+    $previous_page = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'listen_bearbeiten.php';
     ?>
 
     <div class="container mt-5">
@@ -49,6 +57,7 @@
         <div class="content bg-white p-4 rounded shadow-sm mt-4">
             <form action="update_list.php" method="post">
                 <input type="hidden" name="id" value="<?php echo $list['id']; ?>">
+                <input type="hidden" name="previous_page" value="<?php echo htmlspecialchars($previous_page); ?>">
                 <div class="form-group mb-3">
                     <label for="ansager">Ansager:</label>
                     <input type="text" class="form-control" id="ansager" name="ansager" value="<?php echo htmlspecialchars($list['ansager']); ?>" required>
@@ -62,11 +71,12 @@
                     <input type="text" class="form-control" id="filiale" name="filiale" value="<?php echo htmlspecialchars($list['filiale']); ?>" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Speichern</button>
-                <a href="listen_bearbeiten.php" class="btn btn-secondary">Go Back</a>
+                <a href="<?php echo $previous_page; ?>" class="btn btn-secondary">Go Back</a>
             </form>
         </div>
 
         <div class="content bg-white p-4 rounded shadow-sm mt-4">
+            <div class="alert alert-success" id="success-message">Änderungen gespeichert!</div>
             <h2>Fahrzeuge in dieser Liste</h2>
             <?php if ($vehicles->num_rows > 0): ?>
                 <div class="table-responsive">
@@ -125,24 +135,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const forms = document.querySelectorAll(".vehicle-form");
-            forms.forEach(function(form) {
-                form.addEventListener("submit", function(e) {
-                    e.preventDefault(); // Verhindert das Standardformularverhalten
+        document.querySelectorAll('.vehicle-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-                    const formData = new FormData(form);
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("POST", "update_vehicle.php", true);
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            alert("Fahrzeug erfolgreich aktualisiert");
-                        } else {
-                            alert("Fehler beim Aktualisieren des Fahrzeugs");
-                        }
-                    };
-                    xhr.send(formData);
-                });
+                const formData = new FormData(this);
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'update_vehicle.php', true);
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        const successMessage = document.getElementById('success-message');
+                        successMessage.style.display = 'block';
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 3000);
+                    }
+                };
+
+                xhr.send(formData);
             });
         });
     </script>

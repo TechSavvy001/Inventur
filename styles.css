@@ -5,17 +5,18 @@ body {
     margin: 0;
 }
 
+/*
 .menubar {
     background-color: white;
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
     padding: 15px;
     display: flex;
     justify-content: center;
-    margin-bottom: -20px; /* Verringert den Abstand nach unten */
+    margin-bottom: -20px; /* Verringert den Abstand nach unten 
 }
 
 .header {
-    margin-top: 20px; /* Verringert den Abstand nach oben */
+    margin-top: 20px; /* Verringert den Abstand nach oben 
     margin-right: 10px;
     margin-left: 10px;
     background-color: white;
@@ -28,9 +29,9 @@ body {
 }
 
 .content {
-    margin: 0 auto; /* Zentriert den Inhalt */
-    margin-top: 40px; /* Verringert den Abstand nach oben */
-    max-width: 400px; /* Begrenzte Breite für besseres Layout */
+    margin: 0 auto; /* Zentriert den Inhalt 
+    margin-top: 40px; /* Verringert den Abstand nach oben 
+    max-width: 1200px; /* Erhöht die maximale Breite für besseren Layout 
     background-color: white;
     border-radius: 8px;
     padding: 24px;
@@ -131,3 +132,5 @@ th {
 tr:nth-child(even) {
     background-color: #f9f9f9;
 }
+
+*/
