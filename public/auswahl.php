@@ -23,7 +23,7 @@
         exit;
     }
 
-    include 'config.php';
+    include '../config/config.php';
 
     // Fortlaufende Listen-Nr. für den Benutzer ermitteln
     $username = $_SESSION['username'];

@@ -1,6 +1,6 @@
 <?php
 // Verbindung einbinden
-include 'config.php';
+include '../config/config.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Formulardaten extrahieren

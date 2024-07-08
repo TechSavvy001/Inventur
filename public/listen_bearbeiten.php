@@ -23,7 +23,7 @@
         exit;
     }
 
-    include 'config.php';
+    include '../config/config.php';
 
     // SQL-Abfrage zum Abrufen aller Listen des Benutzers
     $username = $_SESSION['username'];
@@ -38,7 +38,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="menubar bg-white shadow-sm py-2 px-4">
-                    <h1 class="h4">Listen bearbeiten</h1>
+                    <h1>Listen bearbeiten</h1>
                 </div>
 
                 <div class="content bg-white p-4 rounded shadow-sm mt-4">
@@ -62,9 +62,9 @@
                                             <td><?php echo htmlspecialchars($list['schreiber']); ?></td>
                                             <td><?php echo htmlspecialchars($list['filiale']); ?></td>
                                             <td>
-                                                <a href="edit_list.php?id=<?php echo $list['id']; ?>"
-                                                    class="btn btn-secondary btn-sm">Bearbeiten</a>
-                                                <a href="delete_list.php?id=<?php echo $list['id']; ?>"
+                                                <a href="../controllers/edit_list.php?id=<?php echo $list['id']; ?>"
+                                                    class="../controllers/btn btn-secondary btn btn-secondary btn-sm">Bearbeiten</a>
+                                                <a href="../controllers/delete_list.php?id=<?php echo $list['id']; ?>"
                                                     class="btn btn-danger btn-sm">Löschen</a>
                                             </td>
                                         </tr>

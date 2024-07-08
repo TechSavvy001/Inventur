@@ -17,7 +17,7 @@
 <body>
     <?php
     session_start();
-    include 'config.php';
+    include '../config/config.php';
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $username = $_POST['username'];
@@ -45,7 +45,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="menubar bg-white shadow-sm py-2 px-4 text-center mb-4">
-                    <h1 class="h4">Login</h1>
+                    <h1>Login</h1>
                 </div>
 
                 <div class="content bg-white p-4 rounded shadow-sm">

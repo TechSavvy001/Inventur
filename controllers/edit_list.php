@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="../public/css.css">
     <style>
         .alert-success {
             display: none;
@@ -21,11 +21,11 @@
     <?php
     session_start();
     if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-        header('Location: login.php');
+        header('Location: ../public/login.php');
         exit;
     }
 
-    include 'config.php';
+    include '../config/config.php';
 
     // Liste ID abrufen
     $id = $_GET['id'];
@@ -46,12 +46,12 @@
     $vehicles = $stmt->get_result();
     
     // Vorherige Seite abrufen
-    $previous_page = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'listen_bearbeiten.php';
+    $previous_page = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../public/listen_bearbeiten.php';
     ?>
 
     <div class="container mt-5">
         <div class="menubar bg-white shadow-sm py-2 px-4">
-            <h1 class="h4">Liste bearbeiten</h1>
+            <h1>Liste bearbeiten</h1>
         </div>
 
         <div class="content bg-white p-4 rounded shadow-sm mt-4">

@@ -1,5 +1,5 @@
 <?php
-include 'config.php';
+include '../config/config.php';
 
 // Daten aus dem POST-Request abrufen
 $id = $_POST['id'];

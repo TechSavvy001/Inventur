@@ -19,7 +19,7 @@
         exit;
     }
 
-    include 'config.php';
+    include '../config/config.php';
 
     // Listen ID abrufen
     $liste_id = $_GET['liste_id'] ?? null;
@@ -50,29 +50,29 @@
     // Verbindung schließen
     $conn->close();
     ?>
+    <div class="container mt-5">
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light menubar">
+    <nav class="menubar bg-white shadow-sm py-2 px-4">
         <div class="container-fluid">
             <h1>Inventur-Aufnahmelisten</h1>
         </div>
     </nav>
 
-    <div class="container mt-5">
         
         <div class="row">
             <div class="col-12">
-                <div class="content p-3 mb-4 bg-white rounded shadow-sm">
-                    <h5 class="mb-3">Benutzerdetails</h5>
+        <div class="content bg-white p-4 rounded shadow-sm mt-4">
+                    <h3 class="mb-3">Benutzerdetails</h3>
                     <div id="user-details">
-                        <p>Ansager: <?php echo htmlspecialchars($userDetails['ansager']); ?></p>
-                        <p>Schreiber: <?php echo htmlspecialchars($userDetails['schreiber']); ?></p>
-                        <p>Filiale: <?php echo htmlspecialchars($userDetails['filiale']); ?></p>
-                        <p>Benutzer: <?php echo htmlspecialchars($userDetails['benutzer']); ?></p>
-                        <p>Liste-Nummer: <?php echo htmlspecialchars($userDetails['listeNummer']); ?></p>
+                        <p>Ansager: <b><?php echo htmlspecialchars($userDetails['ansager']); ?></b></p>
+                        <p>Schreiber: <b><?php echo htmlspecialchars($userDetails['schreiber']); ?></b></p>
+                        <p>Filiale: <b><?php echo htmlspecialchars($userDetails['filiale']); ?></b></p>
+                        <p>Benutzer: <b><?php echo htmlspecialchars($userDetails['benutzer']); ?></b></p>
+                        <p>Liste-Nummer: <b><?php echo htmlspecialchars($userDetails['listeNummer']); ?></b></p>
                     </div>
                     <div class="actions mt-3">
                         <a href="index.php?liste_id=<?php echo $liste_id; ?>" class="btn btn-primary">Neues Fahrzeug</a>
-                        <a href="edit_list.php?id=<?php echo $liste_id; ?>" class="btn btn-secondary">Bearbeiten</a>
+                        <a href="../controllers/edit_list.php?id=<?php echo $liste_id; ?>" class="btn btn-secondary">Bearbeiten</a>
                     </div>
                 </div>
             </div>

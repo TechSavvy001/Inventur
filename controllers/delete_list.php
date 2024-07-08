@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header('Location: login.php');
+    header('Location: ../public/login.php');
     exit;
 }
 
-include 'config.php';
+include '../config/config.php';
 
 if (isset($_GET['id'])) {
     $liste_id = $_GET['id'];
@@ -26,7 +26,7 @@ if (isset($_GET['id'])) {
             $stmt = $conn->prepare("DELETE FROM listen WHERE id = ?");
             $stmt->bind_param("i", $liste_id);
             if ($stmt->execute()) {
-                header('Location: listen_bearbeiten.php');
+                header('Location: ../public/listen_bearbeiten.php');
                 exit();
             } else {
                 echo "Fehler beim Löschen der Liste.";

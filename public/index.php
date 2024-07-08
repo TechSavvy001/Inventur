@@ -15,15 +15,17 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light menubar">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Inventur-Aufnahmelisten</a>
+
+<div class="container mt-5">
+
+<nav class="menubar bg-white shadow-sm py-2 px-4">
+    <div class="container-fluid">
+            <h1>Inventur-Aufnahmelisten</h1>
         </div>
     </nav>
 
     <div class="container mt-5">
         <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6">
                 <div class="menubar bg-white shadow-sm py-2 px-4 text-center mb-4">
                     <h2>Fahrzeug erfassen</h2>
                 </div>
@@ -36,7 +38,7 @@
                         <p class="alert alert-danger">Keine Liste ID gefunden.</p>
                     <?php endif; ?>
 
-                    <form action="submit_vehicle.php" method="post">
+                    <form action="../controllers/submit_vehicle.php" method="post">
                         <input type="hidden" name="liste_id" value="<?php echo htmlspecialchars($_GET['liste_id']); ?>">
                         <div class="mb-3">
                             <label for="barcode" class="form-label">Barcode:</label>

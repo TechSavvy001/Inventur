@@ -17,7 +17,7 @@
 <body>
     <?php
     session_start();
-    include 'config.php';
+    include '../config/config.php';
 
     // Überprüfen, ob der Benutzer angemeldet ist
     if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
@@ -91,7 +91,7 @@
             <div id="message"><?php echo $message; ?></div>
         <?php endif; ?>
 
-        <div class="content mt-4">
+        <div class="content">
             <div class="header p-3 mb-4 bg-white rounded shadow-sm">
                 <h2>Neuen Benutzer hinzufügen</h2>
                 <form action="users.php" method="post">
@@ -108,57 +108,52 @@
                 </form>
             </div>
 
-            <div class="content mt-4">
-                <div class="header p-3 mb-4 bg-white rounded shadow-sm">
-                    <h2>Benutzer bearbeiten</h2>
-                    <?php if ($result->num_rows > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
+            <div class="header p-3 mb-4 bg-white rounded shadow-sm">
+                <h2>Benutzer bearbeiten</h2>
+                <?php if ($result->num_rows > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Benutzername</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($user = $result->fetch_assoc()): ?>
                                     <tr>
-                                        <th>Benutzername</th>
-                                        <th>Aktionen</th>
+                                        <form action="users.php" method="post">
+                                            <td><input type="text" class="form-control" name="username" value="<?php echo htmlspecialchars($user['username']); ?>"></td>
+                                            <td><input type="password" class="form-control" name="password" placeholder="Neues Passwort eingeben"></td>
+                                            <td>
+                                                <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
+                                                <input type="hidden" name="action" value="update">
+                                                <button type="submit" class="btn btn-success btn-sm">Speichern</button>
+                                                <a href="users.php?delete=<?php echo $user['id']; ?>" onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')" class="btn btn-danger btn-sm">Löschen</a>
+                                            </td>
+                                        </form>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <?php while ($user = $result->fetch_assoc()): ?>
-                                        <tr>
-                                            <form action="users.php" method="post">
-                                                <td><input type="text" class="form-control" name="username"
-                                                        value="<?php echo htmlspecialchars($user['username']); ?>"></td>
-                                                <td><input type="password" class="form-control" name="password"
-                                                        placeholder="Neues Passwort eingeben"></td>
-                                                <td>
-                                                    <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
-                                                    <input type="hidden" name="action" value="update">
-                                                    <button type="submit" class="btn btn-success btn-sm">Speichern</button>
-                                                    <a href="users.php?delete=<?php echo $user['id']; ?>"
-                                                        onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')"
-                                                        class="btn btn-danger btn-sm">Löschen</a>
-                                                </td>
-                                            </form>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php else: ?>
-                        <p class="alert alert-warning">Keine Benutzer gefunden.</p>
-                    <?php endif; ?>
-                </div>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <p class="alert alert-warning">Keine Benutzer gefunden.</p>
+                <?php endif; ?>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></script>
-        <script>
-            // Meldung nach 3 Sekunden ausblenden
-            setTimeout(function() {
-                const messageElement = document.getElementById('message');
-                if (messageElement) {
-                    messageElement.style.display = 'none';
-                }
-            }, 3000);
-        </script>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></script>
+    <script>
+        // Meldung nach 3 Sekunden ausblenden
+        setTimeout(function() {
+            const messageElement = document.getElementById('message');
+            if (messageElement) {
+                messageElement.style.display = 'none';
+            }
+        }, 3000);
+    </script>
 </body>
 
 </html>
