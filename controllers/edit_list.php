@@ -7,7 +7,7 @@
     <title>Liste bearbeiten</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="../public/css.css">
     <style>
@@ -27,10 +27,8 @@
 
     include '../config/config.php';
 
-    // Liste ID abrufen
     $id = $_GET['id'];
 
-    // SQL-Abfrage zum Abrufen der Listendaten
     $sql = "SELECT * FROM listen WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
@@ -38,14 +36,12 @@
     $result = $stmt->get_result();
     $list = $result->fetch_assoc();
 
-    // SQL-Abfrage zum Abrufen der Fahrzeugdaten
     $sql = "SELECT * FROM fahrzeuge WHERE liste_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $vehicles = $stmt->get_result();
-    
-    // Vorherige Seite abrufen
+
     $previous_page = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../public/listen_bearbeiten.php';
     ?>
 
@@ -131,32 +127,34 @@
                 <p class="alert alert-warning">Keine Fahrzeuge in dieser Liste gefunden.</p>
             <?php endif; ?>
         </div>
-    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></script>
-    <script>
-        document.querySelectorAll('.vehicle-form').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
 
-                const formData = new FormData(this);
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', 'update_vehicle.php', true);
+<!-- Bearbeitung der Fahrzeudaten -->
+<script>
+    document.querySelectorAll('.vehicle-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
 
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        const successMessage = document.getElementById('success-message');
-                        successMessage.style.display = 'block';
-                        setTimeout(() => {
-                            successMessage.style.display = 'none';
-                        }, 3000);
-                    }
-                };
+            const formData = new FormData(this);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'update_vehicle.php', true);
 
-                xhr.send(formData);
-            });
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const successMessage = document.getElementById('success-message');
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
+                }
+            };
+
+            xhr.send(formData);
         });
-    </script>
+    });
+</script>
 </body>
 
 </html>

@@ -7,13 +7,10 @@
     <title>Listen bearbeiten</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
-        rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-        <link rel="stylesheet" href="css.css">
-
-    </head>
+    <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="css.css">
+</head>
 
 <body>
     <?php
@@ -62,10 +59,8 @@
                                             <td><?php echo htmlspecialchars($list['schreiber']); ?></td>
                                             <td><?php echo htmlspecialchars($list['filiale']); ?></td>
                                             <td>
-                                                <a href="../controllers/edit_list.php?id=<?php echo $list['id']; ?>"
-                                                    class="../controllers/btn btn-secondary btn btn-secondary btn-sm">Bearbeiten</a>
-                                                <a href="../controllers/delete_list.php?id=<?php echo $list['id']; ?>"
-                                                    class="btn btn-danger btn-sm">Löschen</a>
+                                                <a href="aufnahmelisten.php?liste_id=<?php echo $list['id']; ?>" class="btn btn-secondary btn-sm">Bearbeiten</a>
+                                                <a href="../controllers/delete_list.php?id=<?php echo $list['id']; ?>" class="btn btn-danger btn-sm">Löschen</a>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
@@ -85,9 +80,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></script>
 </body>
 
 </html>
