@@ -2,10 +2,8 @@ body {
     font-family: "Poppins", sans-serif;
     font-style: normal;
     background-color: #f2f2f2;
-    margin: 0;
+    margin-bottom: 50px;
 }
-
-
 
 .form-group {
     margin-bottom: 15px;

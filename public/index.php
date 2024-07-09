@@ -41,17 +41,17 @@
                     <form action="../controllers/submit_vehicle.php" method="post">
                         <input type="hidden" name="liste_id" value="<?php echo htmlspecialchars($_GET['liste_id']); ?>">
                         <div class="mb-3">
-                            <label for="barcode" class="form-label">Barcode:</label>
+                            <label for="barcode" class="form-label"><b>Barcode:</b></label>
                             <input type="text" class="form-control" name="barcode" id="barcode" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="barcode8" class="form-label">Barcode 8-stellig:</label>
+                            <label for="barcode8" class="form-label"><b>Barcode 8-stellig:</b></label>
                             <input type="text" class="form-control" name="barcode8" id="barcode8" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="abteilung" class="form-label">Abteilung</label>
+                            <label for="abteilung" class="form-label"><b>Abteilung</b></label>
                             <select class="form-select" name="abteilung" id="abteilung">
                                 <option value="neuwagen">Neuwagen</option>
                                 <option value="gebrauchtwagen">Gebrauchtwagen</option>
@@ -62,32 +62,32 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="fgNummer" class="form-label">Fahrgestellnummer (7-stellig):</label>
+                            <label for="fgNummer" class="form-label"><b>Fahrgestellnummer (7-stellig):</b></label>
                             <input type="text" class="form-control" id="fgNummer" name="fgNummer" pattern=".{7}" title="7 Zeichen erforderlich" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="marke" class="form-label">Marke:</label>
+                            <label for="marke" class="form-label"><b>Marke:</b></label>
                             <input type="text" class="form-control" id="marke" name="marke" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="modell" class="form-label">Modell:</label>
+                            <label for="modell" class="form-label"><b>Modell:</b></label>
                             <input type="text" class="form-control" id="modell" name="modell" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="farbe" class="form-label">Farbe:</label>
+                            <label for="farbe" class="form-label"><b>Farbe:</b></label>
                             <input type="text" class="form-control" id="farbe" name="farbe" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="aufnahmebereich" class="form-label">Aufnahmebereich:</label>
+                            <label for="aufnahmebereich" class="form-label"><b>Aufnahmebereich:</b></label>
                             <input type="text" class="form-control" id="aufnahmebereich" name="aufnahmebereich">
                         </div>
 
                         <div class="mb-3">
-                            <label for="bildNummer" class="form-label">Bild Nummer:</label>
+                            <label for="bildNummer" class="form-label"><b>Bild Nummer:</b></label>
                             <input type="text" class="form-control" id="bildNummer" name="bildNummer" required>
                         </div>
 
