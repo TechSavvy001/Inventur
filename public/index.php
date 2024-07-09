@@ -35,16 +35,16 @@
                 <p class="alert alert-danger">Keine Liste ID gefunden.</p>
             <?php endif; ?>
 
-            <form action="../controllers/submit_vehicle.php" method="post" enctype="multipart/form-data">
+            <form action="../controllers/submit_vehicle.php" method="post" enctype="multipart/form-data" id="vehicleForm">
                 <input type="hidden" name="liste_id" value="<?php echo htmlspecialchars($_GET['liste_id']); ?>">
                 <div class="mb-3">
                     <label for="barcode" class="form-label"><b>Barcode:</b></label>
-                    <input type="text" class="form-control" name="barcode" id="barcode" required>
+                    <input type="text" class="form-control" name="barcode" id="barcode" required pattern="[A-Za-z0-9]{6,12}" title="6 bis 12 alphanumerische Zeichen">
                 </div>
 
                 <div class="mb-3">
                     <label for="barcode8" class="form-label"><b>Barcode 8-stellig:</b></label>
-                    <input type="text" class="form-control" name="barcode8" id="barcode8" required>
+                    <input type="text" class="form-control" name="barcode8" id="barcode8" required pattern="[A-Za-z0-9]{8}" title="8 alphanumerische Zeichen">
                 </div>
 
                 <div class="mb-3">
@@ -60,7 +60,7 @@
 
                 <div class="mb-3">
                     <label for="fgNummer" class="form-label"><b>Fahrgestellnummer (7-stellig):</b></label>
-                    <input type="text" class="form-control" id="fgNummer" name="fgNummer" pattern=".{7}" title="7 Zeichen erforderlich" required>
+                    <input type="text" class="form-control" id="fgNummer" name="fgNummer" pattern="[A-Za-z0-9]{7}" title="7 alphanumerische Zeichen" required>
                 </div>
 
                 <div class="mb-3">
@@ -104,6 +104,29 @@
 <script>
 document.getElementById('openCamera').addEventListener('click', function() {
     // JavaScript Code von Maya zum Öffnen der Kamera
+});
+
+document.getElementById('vehicleForm').addEventListener('submit', function(event) {
+    var barcode = document.getElementById('barcode').value;
+    var barcode8 = document.getElementById('barcode8').value;
+    var fgNummer = document.getElementById('fgNummer').value;
+
+    if (!/^[A-Za-z0-9]{6,12}$/.test(barcode)) {
+        alert('Der Barcode muss 6 bis 12 alphanumerische Zeichen enthalten.');
+        event.preventDefault();
+    }
+
+    if (!/^[A-Za-z0-9]{8}$/.test(barcode8)) {
+        alert('Der Barcode8 muss 8 alphanumerische Zeichen enthalten.');
+        event.preventDefault();
+    }
+
+    if (!/^[A-Za-z0-9]{7}$/.test(fgNummer)) {
+        alert('Die Fahrgestellnummer muss 7 alphanumerische Zeichen enthalten.');
+        event.preventDefault();
+    }
+
+    // Weitere Validierungen nach Bedarf
 });
 </script>
 </body>

@@ -28,6 +28,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Fehler: Die angegebene Liste ID existiert nicht.");
     }
 
+     // Validierung
+     if (!preg_match('/^[A-Za-z0-9]{6,12}$/', $barcode)) {
+        die('Ungültiger Barcode');
+    }
+
+    if (!preg_match('/^[A-Za-z0-9]{8}$/', $barcode8)) {
+        die('Ungültiger Barcode8');
+    }
+
+    if (!preg_match('/^[A-Za-z0-9]{7}$/', $fgNummer)) {
+        die('Ungültige Fahrgestellnummer');
+    }
+
+    if (empty($marke) || empty($modell) || empty($farbe)) {
+        die('Marke, Modell und Farbe dürfen nicht leer sein');
+    }
+
+
+
     // Bild hochladen
     $bildNummer = null;
     $bildPfad = null;
@@ -55,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // SQL-Abfrage zum Einfügen der Daten (Prepared Statement)
+ // SQL-Injection verhindern
     $stmt = $conn->prepare("INSERT INTO fahrzeuge (barcode, barcode8, abteilung, fgNummer, marke, modell, farbe, aufnahmebereich, bildNummer, liste_id, bildPfad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("sssssssssis", $barcode, $barcode8, $abteilung, $fgNummer, $marke, $modell, $farbe, $aufnahmebereich, $bildNummer, $liste_id, $bildPfad);
 

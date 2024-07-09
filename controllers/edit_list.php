@@ -18,7 +18,7 @@
 </head>
 
 <body>
-    <?php
+<?php
     session_start();
     if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         header('Location: ../public/login.php');
@@ -67,7 +67,7 @@
                     <input type="text" class="form-control" id="filiale" name="filiale" value="<?php echo htmlspecialchars($list['filiale']); ?>" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Speichern</button>
-                <a href="<?php echo $previous_page; ?>" class="btn btn-secondary">Go Back</a>
+                <a href="<?php echo $previous_page; ?>" class="btn btn-secondary">Zurück</a>
             </form>
         </div>
 
@@ -82,19 +82,19 @@
                                 <th>Barcode</th>
                                 <th>Barcode 8-stellig</th>
                                 <th>Abteilung</th>
-                                <th>Fahrgestellnummer</th>
+                                <th>Fgst-Nr</th>
                                 <th>Marke</th>
                                 <th>Modell</th>
                                 <th>Farbe</th>
                                 <th>Aufnahmebereich</th>
-                                <th>Bild Nummer</th>
+                                <th>Bild ersetzen</th>
                                 <th>Aktionen</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php while ($vehicle = $vehicles->fetch_assoc()): ?>
                                 <tr>
-                                    <form class="vehicle-form">
+                                    <form class="vehicle-form" method="post" enctype="multipart/form-data">
                                         <td><input type="text" class="form-control" name="barcode" value="<?php echo htmlspecialchars($vehicle['barcode']); ?>"></td>
                                         <td><input type="text" class="form-control" name="barcode8" value="<?php echo htmlspecialchars($vehicle['barcode8']); ?>"></td>
                                         <td>
@@ -111,11 +111,16 @@
                                         <td><input type="text" class="form-control" name="modell" value="<?php echo htmlspecialchars($vehicle['modell']); ?>"></td>
                                         <td><input type="text" class="form-control" name="farbe" value="<?php echo htmlspecialchars($vehicle['farbe']); ?>"></td>
                                         <td><input type="text" class="form-control" name="aufnahmebereich" value="<?php echo htmlspecialchars($vehicle['aufnahmebereich']); ?>"></td>
-                                        <td><input type="text" class="form-control" name="bildNummer" value="<?php echo htmlspecialchars($vehicle['bildNummer']); ?>"></td>
+                                        <td>
+                                            <input type="file" class="form-control" name="bild" accept="image/*">
+                                        </td>
                                         <td>
                                             <input type="hidden" name="id" value="<?php echo $vehicle['id']; ?>">
                                             <input type="hidden" name="liste_id" value="<?php echo $id; ?>">
-                                            <button type="submit" class="btn btn-success btn-sm">Speichern</button>
+                                            <div class="d-grid gap-2">
+                                                <button type="submit" class="btn btn-success btn-sm">Speichern</button>
+                                                <button type="button" class="btn btn-danger btn-sm delete-vehicle" data-id="<?php echo $vehicle['id']; ?>">Löschen</button>
+                                            </div>
                                         </td>
                                     </form>
                                 </tr>
@@ -127,7 +132,6 @@
                 <p class="alert alert-warning">Keine Fahrzeuge in dieser Liste gefunden.</p>
             <?php endif; ?>
         </div>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"></script>
 
@@ -152,6 +156,24 @@
             };
 
             xhr.send(formData);
+        });
+    });
+
+    // Fahrzeug löschen
+    document.querySelectorAll('.delete-vehicle').forEach(button => {
+        button.addEventListener('click', function () {
+            if (confirm('Möchten Sie dieses Fahrzeug wirklich löschen?')) {
+                const vehicleId = this.getAttribute('data-id');
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'delete_vehicle.php', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        location.reload();
+                    }
+                };
+                xhr.send('id=' + vehicleId);
+            }
         });
     });
 </script>
