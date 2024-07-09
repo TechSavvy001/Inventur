@@ -12,7 +12,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $modell = $_POST['modell'];
     $farbe = $_POST['farbe'];
     $aufnahmebereich = $_POST['aufnahmebereich'];
-    $bildNummer = $_POST['bildNummer'];
     $liste_id = $_POST['liste_id'];
     $action = $_POST['action'];
 
@@ -29,9 +28,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Fehler: Die angegebene Liste ID existiert nicht.");
     }
 
+    // Bild hochladen
+    $bildNummer = null;
+    $bildPfad = null;
+    if (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['bild']['tmp_name'];
+        $fileName = $_FILES['bild']['name'];
+        $fileSize = $_FILES['bild']['size'];
+        $fileType = $_FILES['bild']['type'];
+        $fileNameCmps = explode(".", $fileName);
+        $fileExtension = strtolower(end($fileNameCmps));
+
+        $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg');
+        if (in_array($fileExtension, $allowedfileExtensions)) {
+            $bildNummer = uniqid('bild_', true); // Einzigartige Bildnummer generieren
+            $uploadFileDir = './uploaded_files/';
+            $dest_path = $uploadFileDir . $bildNummer . '.' . $fileExtension;
+
+            if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                $bildPfad = $dest_path;
+            } else {
+                echo 'Fehler beim Verschieben der hochgeladenen Datei.';
+            }
+        } else {
+            echo 'Ungültige Dateierweiterung. Erlaubt sind nur: ' . implode(',', $allowedfileExtensions);
+        }
+    }
+
     // SQL-Abfrage zum Einfügen der Daten (Prepared Statement)
-    $stmt = $conn->prepare("INSERT INTO fahrzeuge (barcode, barcode8, abteilung, fgNummer, marke, modell, farbe, aufnahmebereich, bildNummer, liste_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssssssi", $barcode, $barcode8, $abteilung, $fgNummer, $marke, $modell, $farbe, $aufnahmebereich, $bildNummer, $liste_id);
+    $stmt = $conn->prepare("INSERT INTO fahrzeuge (barcode, barcode8, abteilung, fgNummer, marke, modell, farbe, aufnahmebereich, bildNummer, liste_id, bildPfad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssssis", $barcode, $barcode8, $abteilung, $fgNummer, $marke, $modell, $farbe, $aufnahmebereich, $bildNummer, $liste_id, $bildPfad);
 
     if ($stmt->execute() === TRUE) {
         if ($action == 'save_new') {
