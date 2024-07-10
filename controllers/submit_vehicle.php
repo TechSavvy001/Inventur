@@ -14,6 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $aufnahmebereich = $_POST['aufnahmebereich'];
     $liste_id = $_POST['liste_id'];
     $action = $_POST['action'];
+    $bildData = $_POST['bildData'];
 
     // Debugging: Überprüfen der liste_id
     echo "Liste ID: " . htmlspecialchars($liste_id) . "<br>";
@@ -28,8 +29,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Fehler: Die angegebene Liste ID existiert nicht.");
     }
 
-     // Validierung
-     if (!preg_match('/^[A-Za-z0-9]{6,12}$/', $barcode)) {
+    // Validierung
+    if (!preg_match('/^[A-Za-z0-9]{6,12}$/', $barcode)) {
         die('Ungültiger Barcode');
     }
 
@@ -45,12 +46,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die('Marke, Modell und Farbe dürfen nicht leer sein');
     }
 
-
-
     // Bild hochladen
     $bildNummer = null;
     $bildPfad = null;
-    if (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
+    if (!empty($bildData)) {
+        $bildNummer = uniqid('bild_', true); // Einzigartige Bildnummer generieren
+        $uploadFileDir = './uploaded_files/';
+        $dest_path = $uploadFileDir . $bildNummer . '.png';
+
+        $decoded_image = base64_decode(str_replace('data:image/png;base64,', '', $bildData));
+        if (file_put_contents($dest_path, $decoded_image)) {
+            $bildPfad = $dest_path;
+        } else {
+            echo 'Fehler beim Speichern des Bildes.';
+        }
+    } elseif (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
         $fileTmpPath = $_FILES['bild']['tmp_name'];
         $fileName = $_FILES['bild']['name'];
         $fileSize = $_FILES['bild']['size'];
@@ -74,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
- // SQL-Injection verhindern
+    // SQL-Injection verhindern
     $stmt = $conn->prepare("INSERT INTO fahrzeuge (barcode, barcode8, abteilung, fgNummer, marke, modell, farbe, aufnahmebereich, bildNummer, liste_id, bildPfad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("sssssssssis", $barcode, $barcode8, $abteilung, $fgNummer, $marke, $modell, $farbe, $aufnahmebereich, $bildNummer, $liste_id, $bildPfad);
 
