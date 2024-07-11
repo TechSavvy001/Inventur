@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt->execute() === TRUE) {
         if ($action == 'save_new') {
             // Formular wird geleert und die Seite bleibt, um ein neues Fahrzeug einzugeben
-            header("Location: ../public/index.php?liste_id=$liste_id");
+            header("Location: ../public/erfassen.php?liste_id=$liste_id");
         } elseif ($action == 'save_close') {
             // Weiter zur Aufnahmeliste
             header("Location: ../public/aufnahmelisten.php?liste_id=$liste_id");

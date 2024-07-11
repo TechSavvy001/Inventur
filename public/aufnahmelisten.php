@@ -71,7 +71,7 @@
                     <p>Liste-Nummer: <b><?php echo htmlspecialchars($userDetails['listeNummer']); ?></b></p>
                 </div>
                 <div class="actions mt-3">
-                    <a href="index.php?liste_id=<?php echo $liste_id; ?>" class="btn btn-primary">Neues Fahrzeug</a>
+                    <a href="erfassen.php?liste_id=<?php echo $liste_id; ?>" class="btn btn-primary">Neues Fahrzeug</a>
                     <a href="../controllers/edit_list.php?id=<?php echo $liste_id; ?>" class="btn btn-secondary">Bearbeiten</a>
                 </div>
             </div>
