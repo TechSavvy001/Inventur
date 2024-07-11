@@ -14,7 +14,7 @@ function addResult(codeDetection) {
  */
 function initializeBarcodeReader() {
     let configuration = {
-        selector: '.scanner',
+        selector: '#scanner', // Verwenden Sie eine eindeutige ID
         engine: {
             // Alle 1D-Symbologien
             symbologies: [
@@ -64,7 +64,7 @@ function initializeBarcodeReader() {
 /**
  * STRICH SDK initialisieren und bei Erfolg den BarcodeReader initialisieren.
  */
-StrichSDK.initialize('<dein Lizenzschlüssel>')
+StrichSDK.initialize('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNDJlMmMxYy02YjE4LTRhMTYtOTRmZi1mOTU5NjFkOWFkMGEiLCJpc3MiOiJzdHJpY2guaW8iLCJhdWQiOlsiaHR0cHM6Ly9ibXctcmhlaW4tZWR2LmRlIl0sImlhdCI6MTY4ODM2Nzk2NCwibmJmIjoxNjg4MzY3OTY0LCJjYXBhYmlsaXRpZXMiOnsib2ZmbGluZSI6ZmFsc2UsImFuYWx5dGljc09wdE91dCI6ZmFsc2UsImN1c3RvbU92ZXJsYXlMb2dvIjpmYWxzZX0sInZlcnNpb24iOjF9.6b7F7NqxDe4LkNEGD3RzFYkHlD92cvoUYbTfYzOlN78')
     .then(() => {
         initializeBarcodeReader();
     })

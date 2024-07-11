@@ -31,9 +31,12 @@
         $username = $_POST['username'];
         $password = $_POST['password'];
 
+        // Passwort mit Argon2ID hashen
+        $hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
+
         $sql = "INSERT INTO login (username, password) VALUES (?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $username, $password);
+        $stmt->bind_param("ss", $username, $hashedPassword);
 
         if ($stmt->execute() === TRUE) {
             $message = "<p class='alert alert-success'>Benutzer erfolgreich hinzugefügt</p>";
@@ -63,9 +66,18 @@
         $username = $_POST['username'];
         $password = $_POST['password'];
 
-        $sql = "UPDATE login SET username = ?, password = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssi", $username, $password, $id);
+        if (!empty($password)) {
+            // Passwort mit Argon2ID hashen, wenn ein neues Passwort angegeben wird
+            $hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
+            $sql = "UPDATE login SET username = ?, password = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ssi", $username, $hashedPassword, $id);
+        } else {
+            // Passwort nicht aktualisieren, wenn kein neues Passwort angegeben wird
+            $sql = "UPDATE login SET username = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("si", $username, $id);
+        }
 
         if ($stmt->execute() === TRUE) {
             $message = "<p class='alert alert-success'>Benutzer erfolgreich aktualisiert</p>";

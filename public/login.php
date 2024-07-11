@@ -18,26 +18,56 @@
 session_start();
 include '../config/config.php';
 
+$message = '';
+
+// CSRF-Token generieren
+if (empty($_SESSION['token'])) {
+    $_SESSION['token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    $sql = "SELECT * FROM login WHERE username = ? AND password = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $username, $password);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        $_SESSION['loggedin'] = true;
-        $_SESSION['username'] = $user['username'];  // Store username in session
-        header('Location: auswahl.php');
-        exit;
+    // CSRF-Token überprüfen
+    if (!hash_equals($_SESSION['token'], $_POST['token'])) {
+        $message = "Ungültiger CSRF-Token.";
     } else {
-        $error = "Benutzername oder Passwort ist falsch.";
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+
+        // Eingaben validieren und desinfizieren
+        $username = htmlspecialchars($username);
+
+        $sql = "SELECT id, username, password FROM login WHERE username = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($id, $username, $hashedPassword);
+            $stmt->fetch();
+
+            if (password_verify($password, $hashedPassword)) {
+                // Session-Fixation verhindern
+                session_regenerate_id(true);
+
+                $_SESSION['loggedin'] = true;
+                $_SESSION['username'] = $username;
+                $_SESSION['id'] = $id;
+
+                header('Location: auswahl.php');
+                exit;
+            } else {
+                $message = "Ungültiger Benutzername oder Passwort.";
+            }
+        } else {
+            $message = "Ungültiger Benutzername oder Passwort.";
+        }
+
+        $stmt->close();
     }
 }
+
+$conn->close();
 ?>
 
     <div class="container mt-5">
@@ -49,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <div class="content bg-white p-4 rounded shadow-sm">
                     <form action="login.php" method="post">
+                        <input type="hidden" name="token" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
                         <div class="form-group mb-3">
                             <label for="username">Benutzername:</label>
                             <input type="text" class="form-control" id="username" name="username" required>
@@ -59,9 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Login</button>
                     </form>
-                    <?php if (isset($error)): ?>
-                        <p class="alert alert-danger mt-3"><?php echo $error; ?></p>
+                    <?php if (!empty($message)): ?>
+                        <p class="alert alert-danger mt-3"><?php echo $message; ?></p>
                     <?php endif; ?>
+                
                 </div>
             </div>
         </div>

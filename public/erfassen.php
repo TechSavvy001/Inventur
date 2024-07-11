@@ -11,6 +11,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css.css">
+    <style>
+        #scanner {
+            position: relative; /* Fügt die erforderliche CSS-Regel hinzu */
+            width: 100%; /* Sicherstellen, dass das Element eine sichtbare Breite hat */
+            height: 300px; /* Sicherstellen, dass das Element eine sichtbare Höhe hat */
+        }
+    </style>
 </head>
 
 <body>
@@ -113,7 +120,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="scanner" style="height: 300px; width: 100%; background: #000;"></div>
+                <div id="scanner" style="height: 300px; width: 100%; background: #000;"></div> <!-- Stellen Sie sicher, dass das Element die ID "scanner" hat -->
                 <div id="prompt" class="mt-3"></div>
             </div>
             <div class="modal-footer">

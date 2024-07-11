@@ -1,7 +1,7 @@
 import { StrichSDK, BarcodeReader } from "./strich.js";
 
 let configuration = {
-    selector: '#scanner',
+    selector: '#scanner', // Verwenden Sie eine eindeutige ID
     engine: {
         symbologies: ['ean13']
     },
@@ -41,9 +41,15 @@ function stopScanning(value) {
     }
 }
 
-StrichSDK.initialize('<your-license-key>')
+prompt.innerText = 'Initializing SDK...';
+
+// Stellen Sie sicher, dass Ihr Lizenzschlüssel korrekt ist
+const licenseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNDJlMmMxYy02YjE4LTRhMTYtOTRmZi1mOTU5NjFkOWFkMGEiLCJpc3MiOiJzdHJpY2guaW8iLCJhdWQiOlsiaHR0cHM6Ly9ibXctcmhlaW4tZWR2LmRlIl0sImlhdCI6MTY4ODM2Nzk2NCwibmJmIjoxNjg4MzY3OTY0LCJjYXBhYmlsaXRpZXMiOnsib2ZmbGluZSI6ZmFsc2UsImFuYWx5dGljc09wdE91dCI6ZmFsc2UsImN1c3RvbU92ZXJsYXlMb2dvIjpmYWxzZX0sInZlcnNpb24iOjF9.6b7F7NqxDe4LkNEGD3RzFYkHlD92cvoUYbTfYzOlN78';
+
+StrichSDK.initialize(licenseKey)
     .then(() => {
         prompt.innerText = 'SDK initialized successfully, ready to scan.';
+        button.disabled = false;
     })
     .catch(err => {
         prompt.innerText = 'SDK initialization failed: ' + err.message;
