@@ -12,6 +12,9 @@ if (isset($_GET['barcode'])) {
     $fgNummer = $_GET['fgNummer'];
     $stmt = $conn->prepare("SELECT * FROM Bestandsfahrzeuge WHERE fgNummer = ?");
     $stmt->bind_param("s", $fgNummer);
+} else {
+    echo json_encode($response);
+    exit();
 }
 
 if ($stmt->execute()) {

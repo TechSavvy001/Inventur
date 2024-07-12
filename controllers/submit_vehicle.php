@@ -51,12 +51,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bildPfad = null;
     if (!empty($bildData)) {
         $bildNummer = uniqid('bild_', true); // Einzigartige Bildnummer generieren
-        $uploadFileDir = './uploaded_files/';
+        $uploadFileDir = '../uploaded_files/'; // Korrigierter Pfad
         $dest_path = $uploadFileDir . $bildNummer . '.png';
 
         $decoded_image = base64_decode(str_replace('data:image/png;base64,', '', $bildData));
         if (file_put_contents($dest_path, $decoded_image)) {
-            $bildPfad = $dest_path;
+            $bildPfad = 'uploaded_files/' . $bildNummer . '.png'; // Relativer Pfad für Datenbank
         } else {
             echo 'Fehler beim Speichern des Bildes.';
         }
@@ -71,11 +71,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg');
         if (in_array($fileExtension, $allowedfileExtensions)) {
             $bildNummer = uniqid('bild_', true); // Einzigartige Bildnummer generieren
-            $uploadFileDir = './uploaded_files/';
+            $uploadFileDir = '../uploaded_files/';
             $dest_path = $uploadFileDir . $bildNummer . '.' . $fileExtension;
 
             if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                $bildPfad = $dest_path;
+                $bildPfad = 'uploaded_files/' . $bildNummer . '.' . $fileExtension; // Relativer Pfad für Datenbank
+                // Debugging: Überprüfen Sie den Dateipfad
+                echo "Bild erfolgreich hochgeladen: $dest_path<br>";
             } else {
                 echo 'Fehler beim Verschieben der hochgeladenen Datei.';
             }
@@ -83,6 +85,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo 'Ungültige Dateierweiterung. Erlaubt sind nur: ' . implode(',', $allowedfileExtensions);
         }
     }
+
+    // Debugging: Überprüfen der Bildpfad
+    echo "BildPfad: " . htmlspecialchars($bildPfad) . "<br>";
 
     // SQL-Injection verhindern
     $stmt = $conn->prepare("INSERT INTO fahrzeuge (barcode, barcode8, abteilung, fgNummer, marke, modell, farbe, aufnahmebereich, bildNummer, liste_id, bildPfad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
