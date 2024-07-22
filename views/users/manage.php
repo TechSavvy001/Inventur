@@ -1,10 +1,23 @@
 <?php
+// Startet die Session
+session_start();
+
+// Setzt den Seitentitel auf "Benutzerverwaltung"
 $title = "Benutzerverwaltung";
+
+// Bindet eine Authentifizierungsdatei ein, die wahrscheinlich überprüft, ob der Benutzer eingeloggt ist
 include '../../config/auth.php';
+
+// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once '../../config/config.php';
+
+// Bindet den UserController ein, um Benutzeraktionen zu verwalten
 include_once '../../controllers/UserController.php';
 
+// Initialisiert den UserController mit der Datenbankverbindung
 $userController = new UserController($conn);
+
+// Variable für Nachrichten (Erfolgs- oder Fehlermeldungen)
 $message = '';
 
 // Benutzer hinzufügen

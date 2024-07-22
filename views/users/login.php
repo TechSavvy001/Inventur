@@ -1,24 +1,34 @@
 <?php
+// Startet die Session
 session_start();
+
+// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once '../../config/config.php';
+
+// Bindet den UserController ein, um Benutzeraktionen zu verwalten
 include_once '../../controllers/UserController.php';
 
 $message = '';
 
-// CSRF-Token generieren
+// Generiert ein CSRF-Token, wenn es noch nicht existiert
 if (empty($_SESSION['token'])) {
     $_SESSION['token'] = bin2hex(random_bytes(32));
 }
 
+// Überprüft, ob das Formular abgeschickt wurde
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // CSRF-Token überprüfen
+    // Überprüft den CSRF-Token, um sicherzustellen, dass das Formular von der aktuellen Sitzung stammt
     if (!hash_equals($_SESSION['token'], $_POST['token'])) {
         $message = "Ungültiger CSRF-Token.";
     } else {
+        // Holt den Benutzernamen und das Passwort aus dem POST-Request und säubert den Benutzernamen von potenziellen XSS-Angriffen
         $username = htmlspecialchars($_POST['username']);
         $password = $_POST['password'];
 
+        // Initialisiert den UserController mit der Datenbankverbindung
         $userController = new UserController($conn);
+
+        // Versucht, den Benutzer anzumelden und speichert die Rückmeldung (Fehler- oder Erfolgsmeldung) in $message
         $message = $userController->login($username, $password);
     }
 }

@@ -1,31 +1,48 @@
 <?php
+// Startet die Session
 session_start();
+
+// Setzt den Seitentitel auf "Listen Details"
 $title = "Listen Details";
+
+// Bindet den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
 include '../layouts/header.php';
+
+// Bindet den ListController ein, um Listen zu verwalten
 include_once '../../controllers/ListController.php';
+
+// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once '../../config/config.php';
 
-// Überprüfen, ob der Benutzer angemeldet ist
+// Überprüft, ob der Benutzer angemeldet ist
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    // Wenn nicht, wird der Benutzer zur Login-Seite weitergeleitet
     header('Location: ../../views/users/login.php');
     exit;
 }
 
+// Überprüft, ob eine Listen-ID in der URL übergeben wurde
 if (!isset($_GET['liste_id'])) {
     echo "Keine Listen-ID angegeben.";
     exit;
 }
 
+// Holt die Listen-ID aus der URL
 $liste_id = $_GET['liste_id'];
 
+// Initialisiert den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
+
+// Holt die Details der Liste anhand der Listen-ID
 $listDetails = $listController->getListDetails($liste_id);
 
+// Wenn die Liste nicht gefunden wird, wird eine Fehlermeldung angezeigt
 if (!$listDetails) {
     echo "Liste nicht gefunden.";
     exit;
 }
 
+// Holt die Fahrzeuge, die zu dieser Liste gehören
 $vehicles = $listController->getVehiclesByListId($liste_id);
 
 // Erfolgsmeldung abfangen
@@ -35,6 +52,7 @@ if (isset($_SESSION['success_message'])) {
     unset($_SESSION['success_message']);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="de">

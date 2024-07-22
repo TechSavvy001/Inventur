@@ -1,32 +1,48 @@
 <?php
+// Setze den Seitentitel auf "Neue Liste anlegen"
 $title = "Neue Liste anlegen";
+
+// Binde den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
 include '../layouts/header.php';
+
+// Binde den ListController ein, um Listen zu verwalten
 include_once '../../controllers/ListController.php';
+
+// Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once '../../config/config.php';
 
+// Starte die Session, falls sie noch nicht gestartet wurde
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Überprüfen, ob der Benutzer angemeldet ist
+// Überprüfe, ob der Benutzer angemeldet ist
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    // Falls nicht, leite den Benutzer zur Login-Seite weiter
     header('Location: ../../views/users/login.php');
     exit;
 }
 
+// Initialisiere den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
 
+// Überprüfe, ob das Formular abgesendet wurde (POST-Methode)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Hole die Daten aus dem Formular
     $ansager = $_POST['ansager'];
     $schreiber = $_POST['schreiber'];
     $filiale = $_POST['filiale'];
     $benutzer = $_SESSION['username']; // Angemeldeter Benutzer
     $listeNummer = $_POST['listeNummer'];
 
+    // Erstelle eine neue Liste und speichere die ID der neu erstellten Liste
     $liste_id = $listController->create($ansager, $schreiber, $filiale, $benutzer, $listeNummer);
+    
+    // Leite den Benutzer zur Seite "show.php" weiter und übergebe die Listen-ID
     header("Location: show.php?liste_id=$liste_id");
     exit;
 } else {
+    // Falls das Formular nicht abgesendet wurde, ermittle die nächste Listen-Nummer
     $username = $_SESSION['username'];
     $sql = "SELECT MAX(listeNummer) AS maxListeNummer FROM listen WHERE benutzer = ?";
     $stmt = $conn->prepare($sql);

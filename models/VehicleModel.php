@@ -1,8 +1,9 @@
 <?php
 class VehicleModel {
-    private $conn;
-    private $error;
+    private $conn;  // Datenbankverbindung
+    private $error; // Variable zum Speichern von Fehlern
 
+    // Konstruktor, um die Datenbankverbindung zu initialisieren
     public function __construct($conn) {
         $this->conn = $conn;
     }
@@ -13,9 +14,8 @@ class VehicleModel {
         $stmt->bind_param("s", $barcode);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $result->fetch_assoc(); // Rückgabe des gefundenen Fahrzeugs als assoziatives Array
     }
-
 
     // Methode zum Abrufen eines Fahrzeugs anhand der Fahrgestellnummer aus der Tabelle 'bestandsfahrzeuge'
     public function getVehicleByFgNummer($fgNummer) {
@@ -23,7 +23,7 @@ class VehicleModel {
         $stmt->bind_param("s", $fgNummer);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $result->fetch_assoc(); // Rückgabe des gefundenen Fahrzeugs als assoziatives Array
     }
 
     // Methode zum Abrufen eines Fahrzeugs anhand des 8-stelligen Barcodes aus der Tabelle 'bestandsfahrzeuge'
@@ -32,18 +32,17 @@ class VehicleModel {
         $stmt->bind_param("s", $barcode8);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $result->fetch_assoc(); // Rückgabe des gefundenen Fahrzeugs als assoziatives Array
     }
 
-    // Neue Methode zum Abrufen eines Fahrzeugs anhand der Fahrgestellnummer aus der Tabelle 'fahrzeuge'
+    // Methode zum Abrufen eines Fahrzeugs anhand der Fahrgestellnummer aus der Tabelle 'fahrzeuge'
     public function getVehicleByFgNummerFromFahrzeuge($fgNummer) {
         $stmt = $this->conn->prepare("SELECT * FROM fahrzeuge WHERE fgNummer = ?");
         $stmt->bind_param("s", $fgNummer);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $result->fetch_assoc(); // Rückgabe des gefundenen Fahrzeugs als assoziatives Array
     }
-
 
     // Methode zum Einfügen eines neuen Fahrzeugs in die Tabelle 'fahrzeuge'
     public function insertVehicleIntoFahrzeuge($vehicle) {
@@ -51,10 +50,10 @@ class VehicleModel {
         $stmt->bind_param("ssssssssss", $vehicle['barcode'], $vehicle['barcode8'], $vehicle['abteilung'], $vehicle['fgNummer'], $vehicle['marke'], $vehicle['modell'], $vehicle['farbe'], $vehicle['aufnahmebereich'], $vehicle['liste_id'], $vehicle['bildPfad']);
         
         if ($stmt->execute()) {
-            return true;
+            return true; // Erfolgreiches Einfügen
         } else {
-            $this->error = $stmt->error;
-            return false;
+            $this->error = $stmt->error; // Fehler speichern
+            return false; // Fehlgeschlagenes Einfügen
         }
     }
 
@@ -64,10 +63,10 @@ class VehicleModel {
         $stmt->bind_param("sssssssssss", $data['barcode'], $data['barcode8'], $data['abteilung'], $data['fgNummer'], $data['marke'], $data['modell'], $data['farbe'], $data['aufnahmebereich'], $data['bildNummer'], $data['liste_id'], $data['bildPfad']);
         
         if ($stmt->execute()) {
-            return true;
+            return true; // Erfolgreiches Erstellen
         } else {
-            $this->error = $stmt->error;
-            return false;
+            $this->error = $stmt->error; // Fehler speichern
+            return false; // Fehlgeschlagenes Erstellen
         }
     }
 
@@ -77,10 +76,10 @@ class VehicleModel {
         $stmt->bind_param("sssssssssi", $data['barcode'], $data['barcode8'], $data['abteilung'], $data['fgNummer'], $data['marke'], $data['modell'], $data['farbe'], $data['aufnahmebereich'], $data['bildPfad'], $data['id']);
         
         if ($stmt->execute()) {
-            return true;
+            return true; // Erfolgreiches Aktualisieren
         } else {
-            $this->error = $stmt->error;
-            return false;
+            $this->error = $stmt->error; // Fehler speichern
+            return false; // Fehlgeschlagenes Aktualisieren
         }
     }
 
@@ -90,10 +89,10 @@ class VehicleModel {
         $stmt->bind_param("i", $id);
         
         if ($stmt->execute()) {
-            return true;
+            return true; // Erfolgreiches Löschen
         } else {
-            $this->error = $stmt->error;
-            return false;
+            $this->error = $stmt->error; // Fehler speichern
+            return false; // Fehlgeschlagenes Löschen
         }
     }
 
@@ -103,7 +102,7 @@ class VehicleModel {
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $result->fetch_assoc(); // Rückgabe des gefundenen Fahrzeugs als assoziatives Array
     }
 
     // Methode zum Abrufen aller Fahrzeuge anhand der Listen-ID aus der Tabelle 'fahrzeuge'
@@ -111,10 +110,12 @@ class VehicleModel {
         $stmt = $this->conn->prepare("SELECT * FROM fahrzeuge WHERE liste_id = ?");
         $stmt->bind_param("i", $liste_id);
         $stmt->execute();
-        return $stmt->get_result();
+        return $stmt->get_result(); // Rückgabe der gefundenen Fahrzeuge als Ergebnisobjekt
     }
 
+    // Methode zum Abrufen des letzten Fehlers
     public function getError() {
         return $this->error;
     }
 }
+?>

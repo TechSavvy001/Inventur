@@ -1,26 +1,33 @@
 <?php
+// Einbinden der Konfigurations- und Modell-Dateien
 include_once dirname(__DIR__) . '/config/config.php';
 include_once dirname(__DIR__) . '/models/VehicleModel.php';
 
+// Definieren der Basis-URL, falls sie nicht bereits definiert ist
 if (!defined('BASE_URL')) {
     define('BASE_URL', '/Inventur/'); // Basis-URL relativ zur Root-Domain, passe dies bei Bedarf an
 }
 
 class VehicleController {
-    private $model;
+    private $model; // Instanz des VehicleModel
 
+    // Konstruktor, der das VehicleModel initialisiert
     public function __construct($conn) {
         $this->model = new VehicleModel($conn);
     }
 
+    // Methode zum Speichern eines neuen Fahrzeugs
     public function store() {
         session_start();
+        // Überprüfen, ob der Benutzer eingeloggt ist
         if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             header('Location: ../users/login.php');
             exit();
         }
     
+        // Überprüfen, ob die Anfrage eine POST-Anfrage ist
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            // Sammeln der Fahrzeugdaten aus dem POST-Array
             $data = [
                 'barcode' => $_POST['barcode'],
                 'barcode8' => $_POST['barcode8'],
@@ -30,21 +37,22 @@ class VehicleController {
                 'modell' => $_POST['modell'],
                 'farbe' => $_POST['farbe'],
                 'aufnahmebereich' => $_POST['aufnahmebereich'],
-                'bildNummer' => uniqid('bild_', true),
+                'bildNummer' => uniqid('bild_', true), // Generieren einer eindeutigen Bildnummer
                 'liste_id' => $_POST['liste_id'],
                 'bildPfad' => null
             ];
     
-            // Prüfen, ob Fahrzeug bereits existiert
+            // Überprüfen, ob das Fahrzeug bereits existiert
             if ($this->model->getVehicleByFgNummerFromFahrzeuge($data['fgNummer'])) {
                 echo "Fahrzeug mit dieser Fahrgestellnummer existiert bereits.";
                 exit();
             }
     
-            $imageUploaded = false;
+            $imageUploaded = false; // Variable, um zu verfolgen, ob ein Bild hochgeladen wurde
             $uploadDir = dirname(__DIR__) . '/public/uploaded_files/'; // Absoluter Pfad zum Upload-Verzeichnis
             $relativeUploadDir = 'public/uploaded_files/'; // Relativer Pfad für die Datenbank
     
+            // Überprüfen, ob ein Base64-kodiertes Bild hochgeladen wurde
             if (!empty($_POST['bildData'])) {
                 $decoded_image = base64_decode(str_replace('data:image/png;base64,', '', $_POST['bildData']));
                 $dest_path = $uploadDir . $data['bildNummer'] . '.png';
@@ -55,6 +63,7 @@ class VehicleController {
                     echo "Fehler beim Speichern des Base64-Bildes.";
                 }
             } elseif (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
+                // Überprüfen, ob ein Bild über das Formular hochgeladen wurde
                 $fileTmpPath = $_FILES['bild']['tmp_name'];
                 $fileName = $_FILES['bild']['name'];
                 $fileNameCmps = explode(".", $fileName);
@@ -76,6 +85,7 @@ class VehicleController {
                 echo "Kein Bild hochgeladen.";
             }
     
+            // Fahrzeugdaten in der Datenbank speichern
             if ($this->model->createVehicle($data)) {
                 if ($_POST['action'] == 'save_new') {
                     $_SESSION['success_message'] = "Fahrzeug erfolgreich hinzugefügt!";
@@ -91,59 +101,64 @@ class VehicleController {
         }
     }
 
+    // Methode zum Aktualisieren eines Fahrzeugs
+    public function update() {
+        session_start();
+        include '../../config/config.php';
 
-public function update() {
-    session_start();
-    include '../../config/config.php';
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            // Sammeln der Fahrzeugdaten aus dem POST-Array
+            $data = [
+                'id' => $_POST['id'],
+                'barcode' => trim($_POST['barcode']),
+                'barcode8' => trim($_POST['barcode8']),
+                'abteilung' => trim($_POST['abteilung']),
+                'fgNummer' => trim($_POST['fgNummer']),
+                'marke' => trim($_POST['marke']),
+                'modell' => trim($_POST['modell']),
+                'farbe' => trim($_POST['farbe']),
+                'aufnahmebereich' => trim($_POST['aufnahmebereich']),
+                'bildPfad' => null
+            ];
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $data = [
-            'id' => $_POST['id'],
-            'barcode' => trim($_POST['barcode']),
-            'barcode8' => trim($_POST['barcode8']),
-            'abteilung' => trim($_POST['abteilung']),
-            'fgNummer' => trim($_POST['fgNummer']),
-            'marke' => trim($_POST['marke']),
-            'modell' => trim($_POST['modell']),
-            'farbe' => trim($_POST['farbe']),
-            'aufnahmebereich' => trim($_POST['aufnahmebereich']),
-            'bildPfad' => null
-        ];
+            $uploadDir = dirname(__DIR__) . '/public/uploaded_files/'; // Absoluter Pfad zum Upload-Verzeichnis
+            $relativeUploadDir = 'public/uploaded_files/'; // Relativer Pfad für die Datenbank
 
-        $uploadDir = dirname(__DIR__) . '/public/uploaded_files/'; // Absoluter Pfad zum Upload-Verzeichnis
-        $relativeUploadDir = 'public/uploaded_files/'; // Relativer Pfad für die Datenbank
+            // Überprüfen, ob ein neues Bild hochgeladen wurde
+            if (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
+                $fileTmpPath = $_FILES['bild']['tmp_name'];
+                $fileName = $_FILES['bild']['name'];
+                $fileNameCmps = explode(".", $fileName);
+                $fileExtension = strtolower(end($fileNameCmps));
 
-        if (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
-            $fileTmpPath = $_FILES['bild']['tmp_name'];
-            $fileName = $_FILES['bild']['name'];
-            $fileNameCmps = explode(".", $fileName);
-            $fileExtension = strtolower(end($fileNameCmps));
-
-            $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg');
-            if (in_array($fileExtension, $allowedfileExtensions)) {
-                $data['bildNummer'] = uniqid('bild_', true);
-                $dest_path = $uploadDir . $data['bildNummer'] . '.' . $fileExtension;
-                if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                    $data['bildPfad'] = $relativeUploadDir . $data['bildNummer'] . '.' . $fileExtension;
+                $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg');
+                if (in_array($fileExtension, $allowedfileExtensions)) {
+                    $data['bildNummer'] = uniqid('bild_', true);
+                    $dest_path = $uploadDir . $data['bildNummer'] . '.' . $fileExtension;
+                    if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                        $data['bildPfad'] = $relativeUploadDir . $data['bildNummer'] . '.' . $fileExtension;
+                    }
                 }
             }
-        }
 
-        if ($this->model->updateVehicle($data)) {
-            header("Location: ../lists/show.php?liste_id=" . $_POST['liste_id']);
-            exit();
+            // Fahrzeugdaten in der Datenbank aktualisieren
+            if ($this->model->updateVehicle($data)) {
+                header("Location: ../lists/show.php?liste_id=" . $_POST['liste_id']);
+                exit();
+            } else {
+                echo "Fehler: " . $this->model->getError();
+            }
         } else {
-            echo "Fehler: " . $this->model->getError();
+            echo "Ungültige Anfrage";
         }
-    } else {
-        echo "Ungültige Anfrage";
     }
-}
 
+    // Methode zum Abrufen von Fahrzeugen anhand der Listen-ID
     public function getByListId($liste_id) {
         return $this->model->getByListId($liste_id);
     }
 
+    // Methode zum Abrufen der Fahrzeugdetails
     public function getVehicleDetails() {
         header('Content-Type: application/json'); // Setze den Content-Type-Header
 
@@ -181,7 +196,8 @@ public function update() {
 
         echo json_encode($response); // Gebe die JSON-Antwort zurück
     }    
-    
+
+    // Methode zum Löschen eines Fahrzeugs
     public function delete() {
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $id = $_POST['id'];
@@ -195,6 +211,7 @@ public function update() {
                         unlink($filePath);
                     }
                 }
+                // Fahrzeugdaten in der Datenbank löschen
                 if ($this->model->deleteVehicle($id)) {
                     echo json_encode(['success' => true]);
                 } else {
@@ -206,6 +223,8 @@ public function update() {
         }
     }
 }
+
+// Instanziieren des VehicleControllers und Ausführen der entsprechenden Methode basierend auf der Aktion
 $controller = new VehicleController($conn);
 
 if (isset($_GET['action'])) {

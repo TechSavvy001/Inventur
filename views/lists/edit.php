@@ -1,24 +1,41 @@
 <?php
+// Starte die Session
 session_start();
+
+// Setze den Seitentitel auf "Liste bearbeiten"
 $title = "Liste bearbeiten";
+
+// Binde den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
 include '../layouts/header.php';
+
+// Binde den ListController ein, um Listen zu verwalten
 include_once '../../controllers/ListController.php';
+
+// Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once '../../config/config.php';
 
+// Initialisiere den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
 
+// Überprüfe, ob die Listen-ID in der URL angegeben ist
 if (!isset($_GET['id'])) {
     echo "Keine Listen-ID angegeben.";
     exit;
 }
 
+// Hole die Listen-ID aus der URL
 $id = $_GET['id'];
+
+// Hole die Listendetails anhand der Listen-ID
 $list = $listController->getById($id);
+
+// Hole die Fahrzeuge, die zu dieser Liste gehören
 $vehicles = $listController->getVehiclesByListId($id);
 
+// Speichere die vorherige Seite, um später darauf zurückzukehren
 $previous_page = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php';
 
-// Erfolgsmeldung abfangen
+// Erfolgsmeldung abfangen und anzeigen
 $success_message = '';
 if (isset($_SESSION['success_message'])) {
     $success_message = $_SESSION['success_message'];

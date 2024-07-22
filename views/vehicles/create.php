@@ -1,33 +1,48 @@
 <?php
+// Startet die Session
 session_start();
-$title = "Fahrzeug erfassen"; // Setze den Titel der Seite
-include '../layouts/header.php'; // Einbinden des gemeinsamen Headers
+
+// Setzt den Seitentitel auf "Fahrzeug erfassen"
+$title = "Fahrzeug erfassen";
+
+// Einbinden des gemeinsamen Headers
+include '../layouts/header.php';
+
+// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once '../../config/config.php';
+
+// Bindet den ListController ein, um Listenaktionen zu verwalten
 include_once '../../controllers/ListController.php';
 
 // Überprüfen, ob der Benutzer angemeldet ist
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    // Wenn nicht, wird der Benutzer zur Login-Seite weitergeleitet
     header('Location: ../../views/users/login.php');
     exit;
 }
 
-// Überprüfen, ob die Listen-ID gesetzt ist
+// Überprüfen, ob die Listen-ID in der URL übergeben wurde
 if (!isset($_GET['liste_id'])) {
     echo "Keine Listen-ID angegeben.";
     exit;
 }
 
+// Holt die Listen-ID aus der URL
 $liste_id = $_GET['liste_id'];
 
-// Initialisieren des ListControllers
+// Initialisiert den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
+
+// Holt die Details der Liste anhand der Listen-ID
 $listDetails = $listController->getListDetails($liste_id);
 
+// Wenn die Liste nicht gefunden wird, wird eine Fehlermeldung angezeigt
 if (!$listDetails) {
     echo "Liste nicht gefunden.";
     exit;
 }
 
+// Holt die Fahrzeuge, die zu dieser Liste gehören
 $vehicles = $listController->getVehiclesByListId($liste_id);
 
 // Erfolgsmeldung abfangen
@@ -38,11 +53,9 @@ if (isset($_SESSION['success_message'])) {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="de">
-
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fahrzeug erfassen</title>
@@ -60,85 +73,79 @@ if (isset($_SESSION['success_message'])) {
 </head>
 <body>
 <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="menubar bg-white shadow-sm py-2 px-4 text-center mb-4">
-                <h1>Fahrzeug erfassen</h1>
-            </div>
+    <div class="row justify-content-center">
+        <div class="menubar bg-white shadow-sm py-2 px-4 text-center mb-4">
+            <h1>Fahrzeug erfassen</h1>
+        </div>
 
-            <div class="content bg-white p-4 rounded shadow-sm">
-                <!-- Debugging: Überprüfen der liste_id -->
-                <?php if (isset($_GET['liste_id'])): ?>
-                    <p>Listen-ID: <?php echo htmlspecialchars($_GET['liste_id']); ?></p>
-                <?php else: ?>
-                    <p class="alert alert-danger">Keine Liste ID gefunden.</p>
-                <?php endif; ?>
+        <div class="content bg-white p-4 rounded shadow-sm">
 
-                <form action="../../controllers/VehicleController.php?action=store" method="post" enctype="multipart/form-data" id="vehicleForm">
-                    <input type="hidden" name="liste_id" value="<?php echo htmlspecialchars($_GET['liste_id']); ?>">
-                    <input type="hidden" id="bildData" name="bildData">
-                    
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scannerModal">Barcode scannen</button><br><br>
+            <form action="../../controllers/VehicleController.php?action=store" method="post" enctype="multipart/form-data" id="vehicleForm">
+                <input type="hidden" name="liste_id" value="<?php echo htmlspecialchars($_GET['liste_id']); ?>">
+                <input type="hidden" id="bildData" name="bildData">
 
-                    <div class="mb-3">
-                        <label for="barcode" class="form-label"><b>Barcode:</b></label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="barcode" id="barcode" >
-                        </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scannerModal">Barcode scannen</button><br><br>
+
+                <div class="mb-3">
+                    <label for="barcode" class="form-label"><b>Barcode:</b></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="barcode" id="barcode">
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="barcode8" class="form-label"><b>Barcode 8-stellig:</b></label>
-                        <input type="text" class="form-control" name="barcode8" id="barcode8" pattern="[A-Za-z0-9]{8}" title="8 alphanumerische Zeichen">
-                        </div>
+                <div class="mb-3">
+                    <label for="barcode8" class="form-label"><b>Barcode 8-stellig:</b></label>
+                    <input type="text" class="form-control" name="barcode8" id="barcode8" pattern="[A-Za-z0-9]{8}" title="8 alphanumerische Zeichen">
+                </div>
 
-                    <div class="mb-3">
-                        <label for="abteilung" class="form-label"><b>Abteilung</b></label>
-                        <select class="form-select" name="abteilung" id="abteilung">
-                            <option value="neuwagen" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'neuwagen' ? 'selected' : ''; ?>>Neuwagen</option>
-                            <option value="gebrauchtwagen" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'gebrauchtwagen' ? 'selected' : ''; ?>>Gebrauchtwagen</option>
-                            <option value="großkunden" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'großkunden' ? 'selected' : ''; ?>>Großkunden</option>
-                            <option value="fremdesEigentum" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'fremdesEigentum' ? 'selected' : ''; ?>>Fremdes Eigentum</option>
-                            <option value="bmc" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'bmc' ? 'selected' : ''; ?>>BMW</option>
-                        </select>
-                    </div>
+                <div class="mb-3">
+                    <label for="abteilung" class="form-label"><b>Abteilung</b></label>
+                    <select class="form-select" name="abteilung" id="abteilung">
+                        <option value="neuwagen" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'neuwagen' ? 'selected' : ''; ?>>Neuwagen</option>
+                        <option value="gebrauchtwagen" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'gebrauchtwagen' ? 'selected' : ''; ?>>Gebrauchtwagen</option>
+                        <option value="großkunden" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'großkunden' ? 'selected' : ''; ?>>Großkunden</option>
+                        <option value="fremdesEigentum" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'fremdesEigentum' ? 'selected' : ''; ?>>Fremdes Eigentum</option>
+                        <option value="bmc" <?php echo isset($_POST['abteilung']) && $_POST['abteilung'] == 'bmc' ? 'selected' : ''; ?>>BMW</option>
+                    </select>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="fgNummer" class="form-label"><b>Fahrgestellnummer (7-stellig):</b></label>
-                        <input type="text" class="form-control" id="fgNummer" name="fgNummer" pattern="[A-Za-z0-9]{7}" title="7 alphanumerische Zeichen">
-                    </div>
+                <div class="mb-3">
+                    <label for="fgNummer" class="form-label"><b>Fahrgestellnummer (7-stellig):</b></label>
+                    <input type="text" class="form-control" id="fgNummer" name="fgNummer" pattern="[A-Za-z0-9]{7}" title="7 alphanumerische Zeichen">
+                </div>
 
-                    <div class="mb-3">
-                        <label for="marke" class="form-label"><b>Marke:</b></label>
-                        <input type="text" class="form-control" id="marke" name="marke" value="<?php echo isset($_POST['marke']) ? htmlspecialchars($_POST['marke']) : ''; ?>">
-                    </div>
+                <div class="mb-3">
+                    <label for="marke" class="form-label"><b>Marke:</b></label>
+                    <input type="text" class="form-control" id="marke" name="marke" value="<?php echo isset($_POST['marke']) ? htmlspecialchars($_POST['marke']) : ''; ?>">
+                </div>
 
-                    <div class="mb-3">
-                        <label for="modell" class="form-label"><b>Modell:</b></label>
-                        <input type="text" class="form-control" id="modell" name="modell" value="<?php echo isset($_POST['modell']) ? htmlspecialchars($_POST['modell']) : ''; ?>">
-                    </div>
+                <div class="mb-3">
+                    <label for="modell" class="form-label"><b>Modell:</b></label>
+                    <input type="text" class="form-control" id="modell" name="modell" value="<?php echo isset($_POST['modell']) ? htmlspecialchars($_POST['modell']) : ''; ?>">
+                </div>
 
-                    <div class="mb-3">
-                        <label for="farbe" class="form-label"><b>Farbe:</b></label>
-                        <input type="text" class="form-control" id="farbe" name="farbe" value="<?php echo isset($_POST['farbe']) ? htmlspecialchars($_POST['farbe']) : ''; ?>">
-                    </div>
+                <div class="mb-3">
+                    <label for="farbe" class="form-label"><b>Farbe:</b></label>
+                    <input type="text" class="form-control" id="farbe" name="farbe" value="<?php echo isset($_POST['farbe']) ? htmlspecialchars($_POST['farbe']) : ''; ?>">
+                </div>
 
-                    <div class="mb-3">
-                        <label for="aufnahmebereich" class="form-label"><b>Aufnahmebereich:</b></label>
-                        <input type="text" class="form-control" id="aufnahmebereich" name="aufnahmebereich" value="<?php echo isset($_POST['aufnahmebereich']) ? htmlspecialchars($_POST['aufnahmebereich']) : ''; ?>">
-                    </div>
+                <div class="mb-3">
+                    <label for="aufnahmebereich" class="form-label"><b>Aufnahmebereich:</b></label>
+                    <input type="text" class="form-control" id="aufnahmebereich" name="aufnahmebereich" value="<?php echo isset($_POST['aufnahmebereich']) ? htmlspecialchars($_POST['aufnahmebereich']) : ''; ?>">
+                </div>
 
-                    <div class="mb-3">
-                        <label for="bild" class="form-label"><b>Bild:</b></label><br>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cameraModal">Bild machen</button><br><br>
-                        <input type="file" class="form-control" id="bild" name="bild" accept="image/*" capture="camera">
-                    </div>
-                    <br><br>
-                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                        <button type="submit" name="action" value="save_new" class="btn btn-primary btn-lg mb-3">Speichern und Neues Fahrzeug</button>
-                        <button type="submit" name="action" value="save_close" class="btn btn-secondary btn-lg mb-3">Speichern und Beenden</button>
-                        <button type="button" class="btn btn-danger btn-lg mb-3" onclick="window.location.href='../lists/show.php?liste_id=<?php echo htmlspecialchars($_GET['liste_id']); ?>'">Abbruch</button>                    </div>
-                </form>
-            </div>
+                <div class="mb-3">
+                    <label for="bild" class="form-label"><b>Bild:</b></label><br>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cameraModal">Bild machen</button><br><br>
+                    <input type="file" class="form-control" id="bild" name="bild" accept="image/*" capture="camera">
+                </div>
+                <br><br>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <button type="submit" name="action" value="save_new" class="btn btn-primary btn-lg mb-3">Speichern und Neues Fahrzeug</button>
+                    <button type="submit" name="action" value="save_close" class="btn btn-secondary btn-lg mb-3">Speichern und Beenden</button>
+                    <button type="button" class="btn btn-danger btn-lg mb-3" onclick="window.location.href='../lists/show.php?liste_id=<?php echo htmlspecialchars($_GET['liste_id']); ?>'">Abbruch</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -223,142 +230,140 @@ if (isset($_SESSION['success_message'])) {
         stopCamera();
     });
 
-
     function initializeBarcodeReader() {
-    let configuration = {
-        selector: '#scanner',
-        engine: {
-            symbologies: [
-                'databar', 'databar-exp', 'code128', 'code39', 'code93', 'i25', 'codabar',
+        let configuration = {
+            selector: '#scanner',
+            engine: {
+                symbologies: [
+                    'databar', 'databar-exp', 'code128', 'code39', 'code93', 'i25', 'codabar',
                     'ean13', 'ean8', 'upca', 'upce', 'i25', 'qr'
-            ],
-            numScanlines: 15,
-            minScanlinesNeeded: 2,
-            duplicateInterval: 2500
-        },
-        locator: {
-            regionOfInterest: {
-                left: 0.05, right: 0.05, top: 0.3, bottom: 0.3
+                ],
+                numScanlines: 15,
+                minScanlinesNeeded: 2,
+                duplicateInterval: 2500
+            },
+            locator: {
+                regionOfInterest: {
+                    left: 0.05, right: 0.05, top: 0.3, bottom: 0.3
+                }
+            },
+            frameSource: {
+                resolution: 'full-hd'
+            },
+            overlay: {
+                showCameraSelector: true,
+                showFlashlight: true,
+                showDetections: false
+            },
+            feedback: {
+                audio: true,
+                vibration: true
             }
-        },
-        frameSource: {
-            resolution: 'full-hd'
-        },
-        overlay: {
-            showCameraSelector: true,
-            showFlashlight: true,
-            showDetections: false
-        },
-        feedback: {
-            audio: true,
-            vibration: true
-        }
-    };
-    new BarcodeReader(configuration).initialize()
-        .then(reader => {
-            barcodeReader = reader;
-            barcodeReader.detected = (detections) => {
-                const detectedBarcode = detections[0].data;
-                // Versuche zuerst mit barcode8
-                fetchVehicleDetailsByAnyBarcode({ value: detectedBarcode }, 'barcode8');
-            };
-            barcodeReader.start().then(() => {
-                console.log(`BarcodeReader.start() erfolgreich`);
-            }).catch(err => {
-                console.error(`BarcodeReader.start() fehlgeschlagen: ${err}`);
-            });
-        })
-        .catch(error => {
-            console.error(`Initialisierungsfehler: ${error}`);
-        });
-}
-
-// Funktion zum Abrufen der Fahrzeugdetails und Ausfüllen des Formulars
-function fillFormFields(inputField, queryType) {
-    fetchVehicleDetailsByAnyBarcode(inputField, queryType)
-}
-
-function fetchVehicleDetailsByAnyBarcode(inputField, queryType) {
-    console.log('Fetch details for:', queryType, 'with value:', inputField.value);
-
-    // Speichere die aktuellen Werte der Felder
-    const abteilungField = document.getElementById('abteilung');
-    const aufnahmebereichField = document.getElementById('aufnahmebereich');
-    const currentAbteilungValue = abteilungField.value;
-    const currentAufnahmebereichValue = aufnahmebereichField.value;
-
-    const queryValue = inputField.value;
-    if (queryValue) {
-        fetch(`../../controllers/VehicleController.php?action=getVehicleDetails&${queryType}=${queryValue}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Netzwerkantwort war nicht ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    const vehicle = data.vehicle;
-                    document.getElementById('barcode').value = vehicle.barcode;
-                    document.getElementById('barcode8').value = vehicle.barcode8;
-                    document.getElementById('fgNummer').value = vehicle.fgNummer;
-                    document.getElementById('marke').value = vehicle.marke;
-                    document.getElementById('modell').value = vehicle.modell;
-                    document.getElementById('farbe').value = vehicle.farbe;
-
-                    // Aktualisiere die Abteilung nur, wenn sie leer ist
-                    if (currentAbteilungValue === "") {
-                        abteilungField.value = vehicle.abteilung;
-                    }
-
-                    // Aktualisiere den Aufnahmebereich nur, wenn er leer ist
-                    if (currentAufnahmebereichValue === "") {
-                        aufnahmebereichField.value = vehicle.aufnahmebereich;
-                    }
-                } else {
-                    if (queryType === 'barcode8') {
-                        console.warn('Fahrzeug nicht gefunden mit barcode8. Versuche fgNummer.');
-                        fetchVehicleDetailsByAnyBarcode(inputField, 'fgNummer');
-                    } else {
-                        console.error('Fahrzeug nicht gefunden:', data.message);
-                        alert('Fahrzeug nicht gefunden: ' + data.message);
-                    }
-                }
+        };
+        new BarcodeReader(configuration).initialize()
+            .then(reader => {
+                barcodeReader = reader;
+                barcodeReader.detected = (detections) => {
+                    const detectedBarcode = detections[0].data;
+                    // Versuche zuerst mit barcode8
+                    fetchVehicleDetailsByAnyBarcode({ value: detectedBarcode }, 'barcode8');
+                };
+                barcodeReader.start().then(() => {
+                    console.log(`BarcodeReader.start() erfolgreich`);
+                }).catch(err => {
+                    console.error(`BarcodeReader.start() fehlgeschlagen: ${err}`);
+                });
             })
             .catch(error => {
-                console.error('Fehler beim Abrufen der Fahrzeugdetails:', error);
-                alert('Fehler beim Abrufen der Fahrzeugdetails.');
+                console.error(`Initialisierungsfehler: ${error}`);
             });
     }
-}
 
-// Event Listener hinzufügen
-document.getElementById('barcode').addEventListener('focusout', function() {
-    fetchVehicleDetailsByAnyBarcode(this, 'barcode');
-});
+    // Funktion zum Abrufen der Fahrzeugdetails und Ausfüllen des Formulars
+    function fillFormFields(inputField, queryType) {
+        fetchVehicleDetailsByAnyBarcode(inputField, queryType)
+    }
 
-document.getElementById('barcode8').addEventListener('focusout', function() {
-    fetchVehicleDetailsByAnyBarcode(this, 'barcode8');
-});
+    function fetchVehicleDetailsByAnyBarcode(inputField, queryType) {
+        console.log('Fetch details for:', queryType, 'with value:', inputField.value);
 
-document.getElementById('fgNummer').addEventListener('focusout', function() {
-    fetchVehicleDetailsByAnyBarcode(this, 'fgNummer');
-});
+        // Speichere die aktuellen Werte der Felder
+        const abteilungField = document.getElementById('abteilung');
+        const aufnahmebereichField = document.getElementById('aufnahmebereich');
+        const currentAbteilungValue = abteilungField.value;
+        const currentAufnahmebereichValue = aufnahmebereichField.value;
 
-document.getElementById('vehicleForm').addEventListener('submit', function(event) {
-    var barcode = document.getElementById('barcode').value;
-    var barcode8 = document.getElementById('barcode8').value;
-    var fgNummer = document.getElementById('fgNummer').value;
+        const queryValue = inputField.value;
+        if (queryValue) {
+            fetch(`../../controllers/VehicleController.php?action=getVehicleDetails&${queryType}=${queryValue}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Netzwerkantwort war nicht ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const vehicle = data.vehicle;
+                        document.getElementById('barcode').value = vehicle.barcode;
+                        document.getElementById('barcode8').value = vehicle.barcode8;
+                        document.getElementById('fgNummer').value = vehicle.fgNummer;
+                        document.getElementById('marke').value = vehicle.marke;
+                        document.getElementById('modell').value = vehicle.modell;
+                        document.getElementById('farbe').value = vehicle.farbe;
 
+                        // Aktualisiere die Abteilung nur, wenn sie leer ist
+                        if (currentAbteilungValue === "") {
+                            abteilungField.value = vehicle.abteilung;
+                        }
 
-       // if (!/^[A-Za-z0-9]{6,12}$/.test(barcode)) {
+                        // Aktualisiere den Aufnahmebereich nur, wenn er leer ist
+                        if (currentAufnahmebereichValue === "") {
+                            aufnahmebereichField.value = vehicle.aufnahmebereich;
+                        }
+                    } else {
+                        if (queryType === 'barcode8') {
+                            console.warn('Fahrzeug nicht gefunden mit barcode8. Versuche fgNummer.');
+                            fetchVehicleDetailsByAnyBarcode(inputField, 'fgNummer');
+                        } else {
+                            console.error('Fahrzeug nicht gefunden:', data.message);
+                            alert('Fahrzeug nicht gefunden: ' + data.message);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler beim Abrufen der Fahrzeugdetails:', error);
+                    alert('Fehler beim Abrufen der Fahrzeugdetails.');
+                });
+        }
+    }
+
+    // Event Listener hinzufügen
+    document.getElementById('barcode').addEventListener('focusout', function() {
+        fetchVehicleDetailsByAnyBarcode(this, 'barcode');
+    });
+
+    document.getElementById('barcode8').addEventListener('focusout', function() {
+        fetchVehicleDetailsByAnyBarcode(this, 'barcode8');
+    });
+
+    document.getElementById('fgNummer').addEventListener('focusout', function() {
+        fetchVehicleDetailsByAnyBarcode(this, 'fgNummer');
+    });
+
+    document.getElementById('vehicleForm').addEventListener('submit', function(event) {
+        var barcode = document.getElementById('barcode').value;
+        var barcode8 = document.getElementById('barcode8').value;
+        var fgNummer = document.getElementById('fgNummer').value;
+
+        // if (!/^[A-Za-z0-9]{6,12}$/.test(barcode)) {
         //    alert('Der Barcode muss 6 bis 12 alphanumerische Zeichen enthalten.');
         //    event.preventDefault();
-       // }
+        //}
 
         if (!/^[A-Za-z0-9]{8}$/.test(barcode8)) {
             alert('Der Barcode muss genau 8 Ziffern enthalten.');
-            event.preventefault();
+            event.preventDefault();
         }
 
         if (!/^[A-Za-z0-9]{7}$/.test(fgNummer)) {

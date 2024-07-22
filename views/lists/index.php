@@ -1,12 +1,26 @@
 <?php
+// Startet die Session
 session_start();
+
+// Setzt den Seitentitel auf "Listen Übersicht"
 $title = "Listen Übersicht";
+
+// Bindet den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
 include '../layouts/header.php';
+
+// Bindet den ListController ein, um Listen zu verwalten
 include_once '../../controllers/ListController.php';
+
+// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once '../../config/config.php';
 
+// Initialisiert den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
+
+// Holt den Benutzernamen aus der Session
 $username = $_SESSION['username'];
+
+// Holt alle Listen, die dem Benutzer gehören
 $lists = $listController->getAll($username);
 
 // Erfolgsmeldung oder Fehlermeldung abfangen
@@ -69,7 +83,9 @@ if (isset($_SESSION['error_message'])) {
                                         <td><?php echo htmlspecialchars($list['schreiber']); ?></td>
                                         <td><?php echo htmlspecialchars($list['filiale']); ?></td>
                                         <td>
+                                            <!-- Link zum Bearbeiten der Liste -->
                                             <a href="show.php?liste_id=<?php echo $list['id']; ?>" class="btn btn-secondary btn-sm">Bearbeiten</a>
+                                            <!-- Link zum Löschen der Liste -->
                                             <a href="../../controllers/ListController.php?action=delete&id=<?php echo $list['id']; ?>" class="btn btn-danger btn-sm">Löschen</a>
                                         </td>
                                     </tr>
