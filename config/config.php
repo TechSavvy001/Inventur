@@ -13,4 +13,7 @@ $conn = new mysqli($servername, $username, $password, $dbname);         // Speic
 if ($conn->connect_error) {             // Prüfung, ob es bei der Verbindung Fehler gibt
     die("Verbindung fehlgeschlagen: " . $conn->connect_error);
 }
-?>
+
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/Inventur/'); // Basis-URL relativ zur Root-Domain, passe dies bei Bedarf an
+}

@@ -1,0 +1,132 @@
+<?php
+session_start();
+$title = "Listen Details";
+include '../layouts/header.php';
+include_once '../../controllers/ListController.php';
+include_once '../../config/config.php';
+
+// Überprüfen, ob der Benutzer angemeldet ist
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: ../../views/users/login.php');
+    exit;
+}
+
+if (!isset($_GET['liste_id'])) {
+    echo "Keine Listen-ID angegeben.";
+    exit;
+}
+
+$liste_id = $_GET['liste_id'];
+
+$listController = new ListController($conn);
+$listDetails = $listController->getListDetails($liste_id);
+
+if (!$listDetails) {
+    echo "Liste nicht gefunden.";
+    exit;
+}
+
+$vehicles = $listController->getVehiclesByListId($liste_id);
+
+// Erfolgsmeldung abfangen
+$success_message = '';
+if (isset($_SESSION['success_message'])) {
+    $success_message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
+?>
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listen Details</title>
+    <link rel="stylesheet" href="../../public/assets/css/css.css">
+</head>
+<body>
+<div class="container-fluid mt-5" style="max-width: 90%; margin: 0 auto;">
+    <nav class="menubar bg-white shadow-sm py-2 px-4">
+        <div class="container-fluid">
+            <h1>Inventur-Aufnahmelisten</h1>
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="content bg-white p-4 rounded shadow-sm mt-4">
+                <h3 class="mb-3">Benutzerdetails</h3>
+                <?php if ($success_message): ?>
+                    <div class="alert alert-success">
+                        <?php echo htmlspecialchars($success_message); ?>
+                    </div>
+                <?php endif; ?>
+                <div id="user-details">
+                    <p>Ansager: <b><?php echo htmlspecialchars($listDetails['ansager']); ?></b></p>
+                    <p>Schreiber: <b><?php echo htmlspecialchars($listDetails['schreiber']); ?></b></p>
+                    <p>Filiale: <b><?php echo htmlspecialchars($listDetails['filiale']); ?></b></p>
+                    <p>Benutzer: <b><?php echo htmlspecialchars($listDetails['benutzer']); ?></b></p>
+                    <p>Liste-Nummer: <b><?php echo htmlspecialchars($listDetails['listeNummer']); ?></b></p>
+                </div>
+                <div class="actions mt-3">
+                    <a href="../vehicles/create.php?liste_id=<?php echo $liste_id; ?>" class="btn btn-primary">Neues Fahrzeug</a>
+                    <a href="../lists/edit.php?id=<?php echo $liste_id; ?>" class="btn btn-secondary">Bearbeiten</a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="content">
+                <div class="p-3 mb-4 bg-white rounded shadow-sm">
+                    <h2>Fahrzeuge</h2>
+                    <?php if ($vehicles->num_rows > 0): ?>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Barcode</th>
+                                        <th>Barcode 8-stellig</th>
+                                        <th>Abteilung</th>
+                                        <th>Fahrgestellnummer</th>
+                                        <th>Marke</th>
+                                        <th>Modell</th>
+                                        <th>Farbe</th>
+                                        <th>Aufnahmebereich</th>
+                                        <th>Bild Nummer</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while ($vehicle = $vehicles->fetch_assoc()): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($vehicle['barcode']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['barcode8']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['abteilung']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['fgNummer']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['marke']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['modell']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['farbe']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['aufnahmebereich']); ?></td>
+                                            <td><?php echo htmlspecialchars($vehicle['bildNummer']); ?></td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else: ?>
+                        <p class="alert alert-warning">Keine Fahrzeuge gefunden.</p>
+                    <?php endif; ?>
+                    <div class="mt-4">
+                        <a href="index.php" class="btn btn-primary">Zurück</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
