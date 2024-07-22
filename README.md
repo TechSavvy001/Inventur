@@ -17,6 +17,5 @@ Dieses Projekt bietet eine Webanwendung zur Verwaltung von Fahrzeugen. Die Anwen
 - PHP >= 7.4
 - MySQL
 - Webserver (Apache, Nginx, etc.)
-- Composer (für PHP-Abhängigkeiten)
 
 ### Schritt-für-Schritt-Anleitung
