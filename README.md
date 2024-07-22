@@ -5,14 +5,6 @@ Ein Webanwendung zur Verwaltung und Erfassung von Fahrzeugen inklusive Barcode-S
 ## Inhaltsverzeichnis
 
 - [Überblick](#überblick)
-- [Installation](#installation)
-- [Konfiguration](#konfiguration)
-- [Verwendung](#verwendung)
-- [Verzeichnisstruktur](#verzeichnisstruktur)
-- [API-Endpunkte](#api-endpunkte)
-- [Datenbankstruktur](#datenbankstruktur)
-- [Fehlerbehebung](#fehlerbehebung)
-- [Lizenz](#lizenz)
 
 ## Überblick
 
@@ -28,4 +20,3 @@ Dieses Projekt bietet eine Webanwendung zur Verwaltung von Fahrzeugen. Die Anwen
 - Composer (für PHP-Abhängigkeiten)
 
 ### Schritt-für-Schritt-Anleitung
-
