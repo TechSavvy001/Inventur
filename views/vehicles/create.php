@@ -228,7 +228,7 @@ $last_aufnahmebereich = isset($_SESSION['last_aufnahmebereich']) ? $_SESSION['la
         document.getElementById('scanner').style.display = 'block';
 
         if (!barcodeReader) {
-                StrichSDK.initialize('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNDJlMmMxYy02YjE4LTRhMTYtOTRmZi1mOTU5NjFkOWFkMGEiLCJpc3MiOiJzdHJpY2guaW8iLCJhdWQiOlsiaHR0cHM6Ly9ibXctcmhlaW4tZWR2LmRlIl0sImlhdCI6MTY4ODM2Nzk2NCwibmJmIjoxNjg4MzY3OTY0LCJjYXBhYmlsaXRpZXMiOnsib2ZmbGluZSI6ZmFsc2UsImFuYWx5dGljc09wdE91dCI6ZmFsc2UsImN1c3RvbU92ZXJsYXlMb2dvIjpmYWxzZX0sInZlcnNpb24iOjF9.6b7F7NqxDe4LkNEGD3RzFYkHlD92cvoUYbTfYzOlN78')
+            StrichSDK.initialize('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNDJlMmMxYy02YjE4LTRhMTYtOTRmZi1mOTU5NjFkOWFkMGEiLCJpc3MiOiJzdHJpY2guaW8iLCJhdWQiOlsiaHR0cHM6Ly9ibXctcmhlaW4tZWR2LmRlIl0sImlhdCI6MTY4ODM2Nzk2NCwibmJmIjoxNjg4MzY3OTY0LCJjYXBhYmlsaXRpZXMiOnsib2ZmbGluZSI6ZmFsc2UsImFuYWx5dGljc09wdE91dCI6ZmFsc2UsImN1c3RvbU92ZXJsYXlMb2dvIjpmYWxzZX0sInZlcnNpb24iOjF9.6b7F7NqxDe4LkNEGD3RzFYkHlD92cvoUYbTfYzOlN78')
                 .then(() => {
                     initializeBarcodeReader();
                 })
@@ -309,20 +309,34 @@ $last_aufnahmebereich = isset($_SESSION['last_aufnahmebereich']) ? $_SESSION['la
             .then(reader => {
                 barcodeReader = reader;
                 barcodeReader.detected = (detections) => {
-                    const detectedBarcode = detections[0].data;
-                    // Versuche zuerst mit barcode8
-                    fetchVehicleDetailsByAnyBarcode({ value: detectedBarcode }, 'barcode8');
+                const detectedBarcode = detections[0].data;
+                console.log(`Detected barcode: ${detectedBarcode}`);
+
+            // Debugging-Ausgaben
+            if (detectedBarcode.startsWith('https://www.rhein-bmw.de/gebrauchtwagen/fahrzeugdetails/')) {
+                        const parts = detectedBarcode.split('/');
+                        console.log(`URL parts: ${parts}`);
+                        const barcode8 = parts[parts.length - 2]; // Sollte der Penultimate-Part sein
+                        console.log(`Extracted barcode8 from URL: ${barcode8}`);
+                        fetchVehicleDetailsByAnyBarcode({ value: barcode8 }, 'barcode8');
+                    } else {
+                        console.log(`Barcode is not a URL, using detected value: ${detectedBarcode}`);
+                        fetchVehicleDetailsByAnyBarcode({ value: detectedBarcode }, 'barcode8');
+                    }
                 };
-                barcodeReader.start().then(() => {
-                    console.log(`BarcodeReader.start() erfolgreich`);
-                }).catch(err => {
-                    console.error(`BarcodeReader.start() fehlgeschlagen: ${err}`);
-                });
-            })
+            barcodeReader.start().then(() => {
+                console.log(`BarcodeReader.start() erfolgreich`);
+            }).catch(err => {
+                console.error(`BarcodeReader.start() fehlgeschlagen: ${err}`);
+            });
+        })
             .catch(error => {
                 console.error(`Initialisierungsfehler: ${error}`);
             });
     }
+
+
+
 
     // Funktion zum Abrufen der Fahrzeugdetails und Ausfüllen des Formulars
     function fillFormFields(inputField, queryType) {
@@ -367,7 +381,6 @@ $last_aufnahmebereich = isset($_SESSION['last_aufnahmebereich']) ? $_SESSION['la
                             fetchVehicleDetailsByAnyBarcode(inputField, 'fgNummer');
                         } else {
                             console.error('Fahrzeug nicht gefunden:', data.message);
-                            alert('Fahrzeug nicht gefunden: ' + data.message);
                         }
                     }
                 })

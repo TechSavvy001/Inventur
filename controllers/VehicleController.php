@@ -23,12 +23,13 @@ class VehicleController {
     // Methode zum Speichern eines neuen Fahrzeugs
     public function store() {
         session_start();
+        
         // Überprüfen, ob der Benutzer eingeloggt ist
         if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             header('Location: ../users/login.php');
             exit();
         }
-
+    
         // Überprüfen, ob die Anfrage eine POST-Anfrage ist
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Sammeln der Fahrzeugdaten aus dem POST-Array
@@ -45,21 +46,15 @@ class VehicleController {
                 'liste_id' => $_POST['liste_id'],
                 'bildPfad' => null
             ];
-
+    
             // Speichern des Aufnahmebereichs in der Session
             $_SESSION['last_aufnahmebereich'] = $_POST['aufnahmebereich'];
-
-            // Überprüfen, ob das Fahrzeug bereits existiert
-            if ($this->model->getVehicleByFgNummerFromFahrzeuge($data['fgNummer'])) {
-                $_SESSION['error_message'] = "Fahrzeug mit dieser Fahrgestellnummer existiert bereits.";
-                header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
-                exit();
-            }
-
+    
+            // Bild-Upload-Verarbeitung
             $imageUploaded = false; // Variable, um zu verfolgen, ob ein Bild hochgeladen wurde
             $uploadDir = dirname(__DIR__) . '/public/uploaded_files/'; // Absoluter Pfad zum Upload-Verzeichnis
             $relativeUploadDir = 'public/uploaded_files/'; // Relativer Pfad für die Datenbank
-
+    
             // Überprüfen, ob ein Base64-kodiertes Bild hochgeladen wurde
             if (!empty($_POST['bildData'])) {
                 $decoded_image = base64_decode(str_replace('data:image/png;base64,', '', $_POST['bildData']));
@@ -67,10 +62,6 @@ class VehicleController {
                 if (file_put_contents($dest_path, $decoded_image)) {
                     $data['bildPfad'] = $relativeUploadDir . $data['bildNummer'] . '.png';
                     $imageUploaded = true;
-                } else {
-                    $_SESSION['error_message'] = "Fehler beim Speichern des Base64-Bildes.";
-                    header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
-                    exit();
                 }
             } elseif (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
                 // Überprüfen, ob ein Bild über das Formular hochgeladen wurde
@@ -78,32 +69,22 @@ class VehicleController {
                 $fileName = $_FILES['bild']['name'];
                 $fileNameCmps = explode(".", $fileName);
                 $fileExtension = strtolower(end($fileNameCmps));
-
+    
                 $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg');
                 if (in_array($fileExtension, $allowedfileExtensions)) {
                     $dest_path = $uploadDir . $data['bildNummer'] . '.' . $fileExtension;
                     if (move_uploaded_file($fileTmpPath, $dest_path)) {
                         $data['bildPfad'] = $relativeUploadDir . $data['bildNummer'] . '.' . $fileExtension;
                         $imageUploaded = true;
-                    } else {
-                        $_SESSION['error_message'] = "Fehler beim Verschieben des hochgeladenen Bildes.";
-                        header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
-                        exit();
                     }
-                } else {
-                    $_SESSION['error_message'] = "Ungültige Dateierweiterung: $fileExtension";
-                    header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
-                    exit();
                 }
             }
-
+    
             // Falls kein Bild hochgeladen wurde
             if (!$imageUploaded) {
-                $_SESSION['error_message'] = "Es muss ein Bild gemacht werden, bevor das Fahrzeug gespeichert werden kann.";
-                header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
-                exit();
+                // Hier keine Fehlermeldung setzen, nur weiterhin den Controller verwenden
             }
-
+    
             // Fahrzeugdaten in der Datenbank speichern
             if ($this->model->createVehicle($data)) {
                 if ($_POST['action'] == 'save_new') {
@@ -115,13 +96,11 @@ class VehicleController {
                 }
                 exit();
             } else {
-                $_SESSION['error_message'] = "Fehler: " . $this->model->getError();
-                header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
-                exit();
+                // Hier keine Fehlermeldung setzen, nur weiterhin den Controller verwenden
             }
         }
     }
-
+        
     // Methode zum Aktualisieren eines Fahrzeugs
     public function update() {
         session_start();
