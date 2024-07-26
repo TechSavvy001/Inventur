@@ -1,7 +1,7 @@
 <?php
 // Einbinden der notwendigen Konfigurations- und Modell-Dateien
 include_once dirname(__DIR__) . '/config/config.php';
-include_once dirname(__DIR__) . '/models/UserModel.php';
+include_once BASE_PATH . 'models/UserModel.php';
 
 class UserController {
     private $userModel; // Instanz des UserModel
@@ -24,7 +24,8 @@ class UserController {
             $_SESSION['username'] = $username;
 
             // Benutzer zur Hauptseite weiterleiten
-            header('Location: ../../public/index.php');
+            header('Location: ' . BASE_URL . 'lists/start');
+            exit();
         } else {
             // Fehlermeldung zurückgeben, wenn Benutzername oder Passwort ungültig ist
             return "Ungültiger Benutzername oder Passwort.";
@@ -41,7 +42,7 @@ class UserController {
         session_destroy();
 
         // Benutzer zur Login-Seite weiterleiten
-        header('Location: ' . BASE_URL . 'views/users/login.php');
+        header('Location: ' . BASE_URL . 'login');
         exit();
     }
 
@@ -71,4 +72,3 @@ class UserController {
         return $this->userModel->getAllUsers();
     }
 }
-?>

@@ -3,10 +3,10 @@
 session_start();
 
 // Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
-include_once '../../config/config.php';
+include_once __DIR__ . '/../../config/config.php';
 
 // Bindet den UserController ein, um Benutzeraktionen zu verwalten
-include_once '../../controllers/UserController.php';
+include_once BASE_PATH . 'controllers/UserController.php';
 
 $message = '';
 
@@ -28,8 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Initialisiert den UserController mit der Datenbankverbindung
         $userController = new UserController($conn);
 
+        // Debugging-Ausgabe hinzufügen
+        error_log("Attempting to log in user: $username");
+
         // Versucht, den Benutzer anzumelden und speichert die Rückmeldung (Fehler- oder Erfolgsmeldung) in $message
         $message = $userController->login($username, $password);
+
+        // Debugging-Ausgabe der Rückmeldung
+        error_log("Login message: $message");
     }
 }
 ?>
@@ -44,7 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="../../public/assets/css/css.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>public/assets/css/css.css">
+    <link rel="icon" href="<?php echo BASE_URL; ?>public/assets/images/logo.png" type="image/x-icon"> <!-- Favicon Link -->
 </head>
 <body>
     <div class="container mt-5">
@@ -54,18 +61,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <h1>Login</h1>
                 </div>
                 <div class="content bg-white p-4 rounded shadow-sm">
-                    <form action="login.php" method="post">
-                        <input type="hidden" name="token" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
-                        <div class="form-group mb-3">
-                            <label for="username">Benutzername:</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="password">Passwort:</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
-                    </form>
+                <form action="<?php echo BASE_URL; ?>views/users/login.php" method="post">
+                    <input type="hidden" name="token" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
+                    <div class="form-group mb-3">
+                        <label for="username">Benutzername:</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password">Passwort:</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
                     <?php if (!empty($message)): ?>
                         <p class="alert alert-danger mt-3"><?php echo $message; ?></p>
                     <?php endif; ?>
@@ -73,6 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </div>
     </div>
-    <?php include '../layouts/footer.php'; ?>
+    <?php include BASE_PATH . 'views/layouts/footer.php'; ?>
 </body>
 </html>

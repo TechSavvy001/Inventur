@@ -6,6 +6,15 @@ if (session_status() == PHP_SESSION_NONE) {
 include_once dirname(__DIR__, 2) . '/config/config.php';
 
 $base_url = rtrim(BASE_URL, '/') . '/'; 
+
+// Überprüfe, ob der Benutzer angemeldet ist
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    // Falls nicht, leite den Benutzer zur Login-Seite weiter
+    header('Location: ' . BASE_URL . 'views/users/login.php');
+    exit;
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -27,20 +36,20 @@ $base_url = rtrim(BASE_URL, '/') . '/';
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="<?php echo $base_url; ?>public/index.php">Inventur</a>
+            <a class="navbar-brand" href="<?php echo $base_url; ?>lists/start">Inventur</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $base_url; ?>public/index.php">Aktion wählen</a>
+                        <a class="nav-link" href="<?php echo $base_url; ?>lists/start">Aktion wählen</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $base_url; ?>views/images/index.php">Bilder</a>
+                        <a class="nav-link" href="<?php echo $base_url; ?>images">Bilder</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $base_url; ?>views/users/logout.php">Logout</a>
+                        <a class="nav-link" href="<?php echo $base_url; ?>logout">Logout</a>
                     </li>
                 </ul>
             </div>

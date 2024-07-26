@@ -2,17 +2,17 @@
 // Startet die Session
 session_start();
 
+// Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
+include_once BASE_PATH . 'config/config.php';
+
 // Setzt den Seitentitel auf "Listen Übersicht"
 $title = "Listen Übersicht";
 
 // Bindet den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
-include '../layouts/header.php';
+include BASE_PATH . 'views/layouts/header.php';
 
 // Bindet den ListController ein, um Listen zu verwalten
-include_once '../../controllers/ListController.php';
-
-// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
-include_once '../../config/config.php';
+include_once BASE_PATH . 'controllers/ListController.php';
 
 // Initialisiert den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
@@ -36,13 +36,25 @@ if (isset($_SESSION['error_message'])) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listen Übersicht</title>
-    <link rel="stylesheet" href="../../public/assets/css/css.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>public/assets/css/css.css">
+    <style>
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .btn-secondary {
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
 <div class="container-fluid mt-5" style="max-width: 90%; margin: 0 auto;">
@@ -65,7 +77,7 @@ if (isset($_SESSION['error_message'])) {
             <div class="content bg-white p-4 rounded shadow-sm mt-4">
                 <?php if ($lists->num_rows > 0): ?>
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
                                     <th>Liste Nummer</th>
@@ -84,9 +96,9 @@ if (isset($_SESSION['error_message'])) {
                                         <td><?php echo htmlspecialchars($list['filiale']); ?></td>
                                         <td>
                                             <!-- Link zum Bearbeiten der Liste -->
-                                            <a href="show.php?liste_id=<?php echo $list['id']; ?>" class="btn btn-secondary btn-sm">Bearbeiten</a>
+                                            <a href="<?php echo BASE_URL; ?>lists/show?liste_id=<?php echo $list['id']; ?>" class="btn btn-secondary btn-sm">Bearbeiten</a>
                                             <!-- Link zum Löschen der Liste -->
-                                            <a href="../../controllers/ListController.php?action=delete&id=<?php echo $list['id']; ?>" class="btn btn-danger btn-sm">Löschen</a>
+                                            <a href="<?php echo BASE_URL; ?>controllers/ListController.php?action=delete&id=<?php echo $list['id']; ?>" class="btn btn-danger btn-sm">Löschen</a>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -100,6 +112,6 @@ if (isset($_SESSION['error_message'])) {
         </div>
     </div>
 </div>
-<?php include '../layouts/footer.php'; ?>
+<?php include BASE_PATH . 'views/layouts/footer.php'; ?>
 </body>
 </html>

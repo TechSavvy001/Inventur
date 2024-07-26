@@ -113,6 +113,16 @@ class VehicleModel {
         return $stmt->get_result(); // Rückgabe der gefundenen Fahrzeuge als Ergebnisobjekt
     }
 
+     public function getVehiclesWithListNumber() {
+        $sql = "SELECT l.listeNummer, f.bildPfad, f.barcode8, f.fgNummer, f.marke, f.modell, f.farbe 
+                FROM fahrzeuge f
+                JOIN listen l ON f.liste_id = l.id
+                ORDER BY l.listeNummer";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Methode zum Abrufen des letzten Fehlers
     public function getError() {
         return $this->error;

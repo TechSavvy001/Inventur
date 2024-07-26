@@ -2,22 +2,22 @@
 // Startet die Session
 session_start();
 
+// Einbinden der Konfigurationsdatei, die die Datenbankverbindung und BASE_PATH enthält
+include_once dirname(__DIR__, 2) . '/config/config.php';
+
 // Setzt den Seitentitel auf "Fahrzeug erfassen"
 $title = "Fahrzeug erfassen";
 
 // Einbinden des gemeinsamen Headers
-include '../layouts/header.php';
-
-// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
-include_once '../../config/config.php';
+include BASE_PATH . 'views/layouts/header.php';
 
 // Bindet den ListController ein, um Listenaktionen zu verwalten
-include_once '../../controllers/ListController.php';
+include_once BASE_PATH . 'controllers/ListController.php';
 
 // Überprüfen, ob der Benutzer angemeldet ist
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     // Wenn nicht, wird der Benutzer zur Login-Seite weitergeleitet
-    header('Location: ../../views/users/login.php');
+    header('Location: ' . BASE_URL . 'views/users/login.php');
     exit;
 }
 
@@ -51,6 +51,9 @@ if (isset($_SESSION['success_message'])) {
     $success_message = $_SESSION['success_message'];
     unset($_SESSION['success_message']);
 }
+
+// Laden des letzten "Aufnahmebereich" aus der Session
+$last_aufnahmebereich = isset($_SESSION['last_aufnahmebereich']) ? $_SESSION['last_aufnahmebereich'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -59,7 +62,7 @@ if (isset($_SESSION['success_message'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fahrzeug erfassen</title>
-    <link rel="stylesheet" href="../../public/assets/css/css.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>public/assets/css/css.css">
     <style>
         #scanner, #video {
             position: relative;
@@ -68,6 +71,24 @@ if (isset($_SESSION['success_message'])) {
         }
         #canvas {
             display: none;
+        }
+        #image-feedback {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 5px;
+        }
+        #error-message {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #f44336;
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -79,8 +100,15 @@ if (isset($_SESSION['success_message'])) {
         </div>
 
         <div class="content bg-white p-4 rounded shadow-sm">
-
-            <form action="../../controllers/VehicleController.php?action=store" method="post" enctype="multipart/form-data" id="vehicleForm">
+            <?php if (!empty($_SESSION['error_message'])): ?>
+                <div id="error-message">
+                    <?php
+                    echo $_SESSION['error_message'];
+                    unset($_SESSION['error_message']);
+                    ?>
+                </div>
+            <?php endif; ?>
+            <form action="<?php echo BASE_URL; ?>controllers/VehicleController.php?action=store" method="post" enctype="multipart/form-data" id="vehicleForm">
                 <input type="hidden" name="liste_id" value="<?php echo htmlspecialchars($_GET['liste_id']); ?>">
                 <input type="hidden" id="bildData" name="bildData">
 
@@ -131,19 +159,19 @@ if (isset($_SESSION['success_message'])) {
 
                 <div class="mb-3">
                     <label for="aufnahmebereich" class="form-label"><b>Aufnahmebereich:</b></label>
-                    <input type="text" class="form-control" id="aufnahmebereich" name="aufnahmebereich" value="<?php echo isset($_POST['aufnahmebereich']) ? htmlspecialchars($_POST['aufnahmebereich']) : ''; ?>">
+                    <input type="text" class="form-control" id="aufnahmebereich" name="aufnahmebereich" value="<?php echo htmlspecialchars($last_aufnahmebereich); ?>">
                 </div>
 
                 <div class="mb-3">
                     <label for="bild" class="form-label"><b>Bild:</b></label><br>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cameraModal">Bild machen</button><br><br>
-                    <input type="file" class="form-control" id="bild" name="bild" accept="image/*" capture="camera">
+                    <div id="image-feedback">Bild erfolgreich hochgeladen oder gemacht.</div>
                 </div>
                 <br><br>
                 <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
                     <button type="submit" name="action" value="save_new" class="btn btn-primary btn-lg mb-3">Speichern und Neues Fahrzeug</button>
                     <button type="submit" name="action" value="save_close" class="btn btn-secondary btn-lg mb-3">Speichern und Beenden</button>
-                    <button type="button" class="btn btn-danger btn-lg mb-3" onclick="window.location.href='../lists/show.php?liste_id=<?php echo htmlspecialchars($_GET['liste_id']); ?>'">Abbruch</button>
+                    <button type="button" class="btn btn-danger btn-lg mb-3" onclick="window.location.href='<?php echo BASE_URL; ?>lists/show?liste_id=<?php echo htmlspecialchars($_GET['liste_id']); ?>'">Abbruch</button>
                 </div>
             </form>
         </div>
@@ -190,17 +218,17 @@ if (isset($_SESSION['success_message'])) {
 </div>
 
 <script type="module">
-    import { StrichSDK, BarcodeReader } from '../../public/assets/js/strich.js';
-    import { startScanning, stopScanning } from '../../public/assets/js/showhide.js';
-    import { startCamera, stopCamera } from '../../public/assets/js/camera.js'; // Korrekte Import
+    import { StrichSDK, BarcodeReader } from '<?php echo BASE_URL; ?>public/assets/js/strich.js';
+    import { startScanning, stopScanning } from '<?php echo BASE_URL; ?>public/assets/js/showhide.js';
+    import { startCamera, stopCamera, captureImage } from '<?php echo BASE_URL; ?>public/assets/js/camera.js';
 
     let barcodeReader;
-    
+
     document.getElementById('scannerModal').addEventListener('shown.bs.modal', function() {
         document.getElementById('scanner').style.display = 'block';
 
-        if (!barcodeReader) {  // Initialisieren Sie den Barcode-Reader nur einmal
-            StrichSDK.initialize('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNDJlMmMxYy02YjE4LTRhMTYtOTRmZi1mOTU5NjFkOWFkMGEiLCJpc3MiOiJzdHJpY2guaW8iLCJhdWQiOlsiaHR0cHM6Ly9ibXctcmhlaW4tZWR2LmRlIl0sImlhdCI6MTY4ODM2Nzk2NCwibmJmIjoxNjg4MzY3OTY0LCJjYXBhYmlsaXRpZXMiOnsib2ZmbGluZSI6ZmFsc2UsImFuYWx5dGljc09wdE91dCI6ZmFsc2UsImN1c3RvbU92ZXJsYXlMb2dvIjpmYWxzZX0sInZlcnNpb24iOjF9.6b7F7NqxDe4LkNEGD3RzFYkHlD92cvoUYbTfYzOlN78')
+        if (!barcodeReader) {
+                StrichSDK.initialize('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNDJlMmMxYy02YjE4LTRhMTYtOTRmZi1mOTU5NjFkOWFkMGEiLCJpc3MiOiJzdHJpY2guaW8iLCJhdWQiOlsiaHR0cHM6Ly9ibXctcmhlaW4tZWR2LmRlIl0sImlhdCI6MTY4ODM2Nzk2NCwibmJmIjoxNjg4MzY3OTY0LCJjYXBhYmlsaXRpZXMiOnsib2ZmbGluZSI6ZmFsc2UsImFuYWx5dGljc09wdE91dCI6ZmFsc2UsImN1c3RvbU92ZXJsYXlMb2dvIjpmYWxzZX0sInZlcnNpb24iOjF9.6b7F7NqxDe4LkNEGD3RzFYkHlD92cvoUYbTfYzOlN78')
                 .then(() => {
                     initializeBarcodeReader();
                 })
@@ -229,6 +257,23 @@ if (isset($_SESSION['success_message'])) {
     document.getElementById('cameraModal').addEventListener('hidden.bs.modal', function() {
         stopCamera();
     });
+
+    document.getElementById('captureButton').addEventListener('click', function() {
+        captureImage().then(imageData => {
+            document.getElementById('bildData').value = imageData;
+            showImageFeedback();
+        }).catch(error => {
+            console.error('Fehler beim Aufnehmen des Bildes:', error);
+        });
+    });
+
+    function showImageFeedback() {
+        const feedback = document.getElementById('image-feedback');
+        feedback.style.display = 'block';
+        setTimeout(() => {
+            feedback.style.display = 'none';
+        }, 3000);
+    }
 
     function initializeBarcodeReader() {
         let configuration = {
@@ -289,13 +334,11 @@ if (isset($_SESSION['success_message'])) {
 
         // Speichere die aktuellen Werte der Felder
         const abteilungField = document.getElementById('abteilung');
-        const aufnahmebereichField = document.getElementById('aufnahmebereich');
         const currentAbteilungValue = abteilungField.value;
-        const currentAufnahmebereichValue = aufnahmebereichField.value;
 
         const queryValue = inputField.value;
         if (queryValue) {
-            fetch(`../../controllers/VehicleController.php?action=getVehicleDetails&${queryType}=${queryValue}`)
+            fetch(`<?php echo BASE_URL; ?>controllers/VehicleController.php?action=getVehicleDetails&${queryType}=${queryValue}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Netzwerkantwort war nicht ok');
@@ -317,10 +360,7 @@ if (isset($_SESSION['success_message'])) {
                             abteilungField.value = vehicle.abteilung;
                         }
 
-                        // Aktualisiere den Aufnahmebereich nur, wenn er leer ist
-                        if (currentAufnahmebereichValue === "") {
-                            aufnahmebereichField.value = vehicle.aufnahmebereich;
-                        }
+                        // Der Aufnahmebereich wird nicht automatisch aktualisiert
                     } else {
                         if (queryType === 'barcode8') {
                             console.warn('Fahrzeug nicht gefunden mit barcode8. Versuche fgNummer.');
@@ -355,11 +395,7 @@ if (isset($_SESSION['success_message'])) {
         var barcode = document.getElementById('barcode').value;
         var barcode8 = document.getElementById('barcode8').value;
         var fgNummer = document.getElementById('fgNummer').value;
-
-        // if (!/^[A-Za-z0-9]{6,12}$/.test(barcode)) {
-        //    alert('Der Barcode muss 6 bis 12 alphanumerische Zeichen enthalten.');
-        //    event.preventDefault();
-        //}
+        var bildData = document.getElementById('bildData').value;
 
         if (!/^[A-Za-z0-9]{8}$/.test(barcode8)) {
             alert('Der Barcode muss genau 8 Ziffern enthalten.');
@@ -368,6 +404,10 @@ if (isset($_SESSION['success_message'])) {
 
         if (!/^[A-Za-z0-9]{7}$/.test(fgNummer)) {
             alert('Die Fahrgestellnummer muss 7 alphanumerische Zeichen enthalten.');
+            event.preventDefault();
+        }
+        if (bildData === "") {
+            alert('Es muss ein Bild gemacht werden, bevor das Fahrzeug gespeichert werden kann.');
             event.preventDefault();
         }
     });
@@ -379,9 +419,9 @@ if (isset($_SESSION['success_message'])) {
     }
 </script>
 
-<script type="module" src="../../public/assets/js/showhide.js"></script>
-<script type="module" src="../../public/assets/js/main.js"></script>
-<script type="module" src="../../public/assets/js/camera.js"></script>
+<script type="module" src="<?php echo BASE_URL; ?>public/assets/js/showhide.js"></script>
+<script type="module" src="<?php echo BASE_URL; ?>public/assets/js/main.js"></script>
+<script type="module" src="<?php echo BASE_URL; ?>public/assets/js/camera.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

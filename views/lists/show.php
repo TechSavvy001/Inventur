@@ -5,21 +5,14 @@ session_start();
 // Setzt den Seitentitel auf "Listen Details"
 $title = "Listen Details";
 
+// Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
+include_once __DIR__ . '/../../config/config.php';
+
 // Bindet den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
-include '../layouts/header.php';
+include BASE_PATH . 'views/layouts/header.php';
 
 // Bindet den ListController ein, um Listen zu verwalten
-include_once '../../controllers/ListController.php';
-
-// Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
-include_once '../../config/config.php';
-
-// Überprüft, ob der Benutzer angemeldet ist
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    // Wenn nicht, wird der Benutzer zur Login-Seite weitergeleitet
-    header('Location: ../../views/users/login.php');
-    exit;
-}
+include_once BASE_PATH . 'controllers/ListController.php';
 
 // Überprüft, ob eine Listen-ID in der URL übergeben wurde
 if (!isset($_GET['liste_id'])) {
@@ -60,7 +53,21 @@ if (isset($_SESSION['success_message'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listen Details</title>
-    <link rel="stylesheet" href="../../public/assets/css/css.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>public/assets/css/css.css">
+     <style>
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .btn-secondary {
+            margin-right: 5px;
+        }
+        .actions a {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
 <div class="container-fluid mt-5" style="max-width: 90%; margin: 0 auto;">
@@ -87,9 +94,8 @@ if (isset($_SESSION['success_message'])) {
                     <p>Liste-Nummer: <b><?php echo htmlspecialchars($listDetails['listeNummer']); ?></b></p>
                 </div>
                 <div class="actions mt-3">
-                    <a href="../vehicles/create.php?liste_id=<?php echo $liste_id; ?>" class="btn btn-primary">Neues Fahrzeug</a>
-                    <a href="../lists/edit.php?id=<?php echo $liste_id; ?>" class="btn btn-secondary">Bearbeiten</a>
-                    
+                    <a href="<?php echo BASE_URL; ?>vehicles/create?liste_id=<?php echo $liste_id; ?>" class="btn btn-primary">Neues Fahrzeug</a>
+                    <a href="<?php echo BASE_URL; ?>lists/edit?id=<?php echo $liste_id; ?>" class="btn btn-secondary">Bearbeiten</a>
                 </div>
             </div>
         </div>
@@ -102,10 +108,9 @@ if (isset($_SESSION['success_message'])) {
                     <h2>Fahrzeuge</h2>
                     <?php if ($vehicles->num_rows > 0): ?>
                         <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
+                        <table class="table table-striped table-hover">
+                        <thead>
                                     <tr>
-                                        <th>Barcode</th>
                                         <th>Barcode 8-stellig</th>
                                         <th>Abteilung</th>
                                         <th>Fahrgestellnummer</th>
@@ -119,7 +124,6 @@ if (isset($_SESSION['success_message'])) {
                                 <tbody>
                                     <?php while ($vehicle = $vehicles->fetch_assoc()): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($vehicle['barcode']); ?></td>
                                             <td><?php echo htmlspecialchars($vehicle['barcode8']); ?></td>
                                             <td><?php echo htmlspecialchars($vehicle['abteilung']); ?></td>
                                             <td><?php echo htmlspecialchars($vehicle['fgNummer']); ?></td>
@@ -137,7 +141,7 @@ if (isset($_SESSION['success_message'])) {
                         <p class="alert alert-warning">Keine Fahrzeuge gefunden.</p>
                     <?php endif; ?>
                     <div class="mt-4">
-                        <a href="index.php" class="btn btn-primary">Zurück</a>
+                        <a href="<?php echo BASE_URL; ?>lists/index" class="btn btn-primary">Zurück</a>
                     </div>
                 </div>
             </div>

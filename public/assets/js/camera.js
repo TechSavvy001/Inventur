@@ -6,7 +6,6 @@ function startCamera() {
     const video = document.getElementById('video'); // Das Video-Element, in dem der Kamerastream angezeigt wird
     const canvas = document.getElementById('canvas'); // Das Canvas-Element zum Aufnehmen des Bildes
     const context = canvas.getContext('2d'); // Der 2D-Kontext des Canvas zum Zeichnen des Bildes
-    const captureButton = document.getElementById('captureButton'); // Der Button zum Aufnehmen des Bildes
 
     // Zugriff auf die Kamera des Geräts
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -18,18 +17,6 @@ function startCamera() {
         .catch((err) => {
             console.error('Error accessing the camera: ', err); // Fehlerbehandlung bei Zugriff auf die Kamera
         });
-
-    // Event-Listener für den Aufnahme-Button
-    captureButton.addEventListener('click', () => {
-        canvas.width = video.videoWidth; // Setzen der Canvas-Breite auf die Video-Breite
-        canvas.height = video.videoHeight; // Setzen der Canvas-Höhe auf die Video-Höhe
-        context.drawImage(video, 0, 0, canvas.width, canvas.height); // Zeichnen des aktuellen Videobildes auf das Canvas
-        
-        const imageUrl = canvas.toDataURL('image/png'); // Erstellen einer Data-URL des Bildes im PNG-Format
-        document.getElementById('bildData').value = imageUrl; // Setzen der Data-URL im versteckten Input-Feld
-        
-        stopCamera(); // Die Kamera nach dem Aufnehmen des Bildes stoppen
-    });
 }
 
 // Funktion zum Stoppen der Kamera
@@ -42,5 +29,27 @@ function stopCamera() {
     video.srcObject = null; // Den Stream des Video-Elements entfernen
 }
 
+// Funktion zum Aufnehmen des Bildes
+function captureImage() {
+    return new Promise((resolve, reject) => {
+        try {
+            const video = document.getElementById('video'); // Das Video-Element
+            const canvas = document.getElementById('canvas'); // Das Canvas-Element
+            const context = canvas.getContext('2d'); // Der 2D-Kontext des Canvas
+
+            canvas.width = video.videoWidth; // Setzen der Canvas-Breite auf die Video-Breite
+            canvas.height = video.videoHeight; // Setzen der Canvas-Höhe auf die Video-Höhe
+            context.drawImage(video, 0, 0, canvas.width, canvas.height); // Zeichnen des aktuellen Videobildes auf das Canvas
+
+            const imageUrl = canvas.toDataURL('image/png'); // Erstellen einer Data-URL des Bildes im PNG-Format
+            resolve(imageUrl); // Auflösung der Data-URL
+
+            stopCamera(); // Die Kamera nach dem Aufnehmen des Bildes stoppen
+        } catch (error) {
+            reject('Fehler beim Aufnehmen des Bildes: ' + error);
+        }
+    });
+}
+
 // Exportieren der Funktionen für den Import in anderen Dateien
-export { startCamera, stopCamera };
+export { startCamera, stopCamera, captureImage };

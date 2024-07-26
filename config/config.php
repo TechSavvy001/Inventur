@@ -15,5 +15,10 @@ if ($conn->connect_error) {             // Prüfung, ob es bei der Verbindung Fe
 }
 
 if (!defined('BASE_URL')) {
-    define('BASE_URL', '/Inventur/'); // Basis-URL relativ zur Root-Domain, passe dies bei Bedarf an
+    define('BASE_URL', '/inventur/'); // Basis-URL relativ zur Root-Domain, passe dies bei Bedarf an
 }
+
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', __DIR__ . '/../'); // Basis-Pfad relativ zur Root-Domain, passe dies bei Bedarf an
+}
+?>

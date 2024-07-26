@@ -1,8 +1,8 @@
 <?php
 // Einbinden der notwendigen Konfigurations- und Modell-Dateien
 include_once dirname(__DIR__) . '/config/config.php';
-include_once dirname(__DIR__) . '/models/ListModel.php';
-include_once dirname(__DIR__) . '/models/VehicleModel.php';
+include_once BASE_PATH . 'models/ListModel.php';
+include_once BASE_PATH . 'models/VehicleModel.php';
 
 class ListController {
     private $listModel;  // Instanz des ListModel
@@ -26,7 +26,7 @@ class ListController {
                 session_start();  // Sitzung starten, falls noch nicht gestartet
             }
             if (!isset($_SESSION['username'])) {  // Überprüfen, ob der Benutzer eingeloggt ist
-                header('Location: ../users/login.php');
+                header('Location: ' . BASE_URL . 'views/users/login.php');
                 exit;
             }
             // POST-Daten abrufen
@@ -38,10 +38,10 @@ class ListController {
 
             // Neue Liste erstellen und zur Detailansicht weiterleiten
             $liste_id = $this->create($ansager, $schreiber, $filiale, $benutzer, $listeNummer);
-            header("Location: show.php?liste_id=$liste_id");
-            exit;
+            header("Location: " . BASE_URL . "views/lists/show.php?liste_id=$liste_id");
+            exit();
         } else {
-            include '../views/lists/create.php';  // Formular anzeigen, wenn es kein POST-Request ist
+            include BASE_PATH . 'views/lists/create.php';  // Formular anzeigen, wenn es kein POST-Request ist
         }
     }
 
@@ -67,7 +67,7 @@ class ListController {
             if ($this->listModel->update($id, $ansager, $schreiber, $filiale)) {
                 session_start();
                 $_SESSION['success_message'] = "Die Liste wurde erfolgreich aktualisiert.";
-                header("Location: ../views/lists/show.php?liste_id=$id");
+                header("Location: " . BASE_URL . "views/lists/show.php?liste_id=$id");
                 exit();
             } else {
                 echo "Fehler beim Aktualisieren der Liste.";
@@ -82,7 +82,7 @@ class ListController {
         if ($vehicles->num_rows > 0) {  // Wenn die Liste Fahrzeuge enthält, löschen verhindern
             session_start();
             $_SESSION['error_message'] = "Die Liste kann nicht gelöscht werden, da sie noch Fahrzeuge enthält. Bitte löschen Sie zuerst alle Fahrzeuge.";
-            header("Location: ../views/lists/index.php");
+            header("Location: " . BASE_URL . "views/lists/index.php");
             exit();
         }
 
@@ -90,12 +90,12 @@ class ListController {
         if ($this->listModel->delete($id)) {
             session_start();
             $_SESSION['success_message'] = "Die Liste wurde erfolgreich gelöscht.";
-            header("Location: ../views/lists/index.php");
+            header("Location: " . BASE_URL . "views/lists/index.php");
             exit();
         } else {
             session_start();
             $_SESSION['error_message'] = "Fehler beim Löschen der Liste.";
-            header("Location: ../views/lists/index.php");
+            header("Location: " . BASE_URL . "views/lists/index.php");
             exit();
         }
     }

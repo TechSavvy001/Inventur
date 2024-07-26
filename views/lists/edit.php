@@ -5,14 +5,14 @@ session_start();
 // Setze den Seitentitel auf "Liste bearbeiten"
 $title = "Liste bearbeiten";
 
+// Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
+include_once dirname(__DIR__, 2) . '/config/config.php'; 
+
 // Binde den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
-include '../layouts/header.php';
+include BASE_PATH . 'views/layouts/header.php';
 
 // Binde den ListController ein, um Listen zu verwalten
-include_once '../../controllers/ListController.php';
-
-// Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
-include_once '../../config/config.php';
+include_once BASE_PATH . 'controllers/ListController.php';
 
 // Initialisiere den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
@@ -33,7 +33,7 @@ $list = $listController->getById($id);
 $vehicles = $listController->getVehiclesByListId($id);
 
 // Speichere die vorherige Seite, um später darauf zurückzukehren
-$previous_page = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php';
+$previous_page = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : BASE_URL . 'views/lists/index.php';
 
 // Erfolgsmeldung abfangen und anzeigen
 $success_message = '';
@@ -50,11 +50,18 @@ if (isset($_SESSION['success_message'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liste bearbeiten</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../public/assets/css/css.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>public/assets/css/css.css">
     <style>
         .alert-success {
             display: <?php echo $success_message ? 'block' : 'none'; ?>;
         }
+        .btn-save:hover, .btn-delete:hover {
+            opacity: 0.8;
+        }        
+        .table th, .table td {
+            text-align: left;
+        }
+
     </style>
 </head>
 <body>
@@ -64,7 +71,7 @@ if (isset($_SESSION['success_message'])) {
     </div>
 
     <div class="content bg-white p-4 rounded shadow-sm mt-4">
-        <form action="../../controllers/ListController.php?action=update" method="post">
+        <form action="<?php echo BASE_URL; ?>controllers/ListController.php?action=update" method="post">
             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
             <input type="hidden" name="previous_page" value="<?php echo htmlspecialchars($previous_page); ?>">
             <div class="form-group mb-3">
@@ -80,8 +87,8 @@ if (isset($_SESSION['success_message'])) {
                 <input type="text" class="form-control" id="filiale" name="filiale" value="<?php echo htmlspecialchars($list['filiale']); ?>" required>
             </div>
             <button type="submit" class="btn btn-primary">Speichern</button>
-            <a href="../lists/show.php?liste_id=<?php echo htmlspecialchars($id); ?>" class="btn btn-secondary">Zurück</a>
-            </form>
+            <a href="<?php echo BASE_URL; ?>views/lists/show.php?liste_id=<?php echo htmlspecialchars($id); ?>" class="btn btn-secondary">Zurück</a>
+        </form>
     </div>
 
     <div class="content bg-white p-4 rounded shadow-sm mt-4">
@@ -89,17 +96,16 @@ if (isset($_SESSION['success_message'])) {
         <h2>Fahrzeuge in dieser Liste</h2>
         <?php if ($vehicles->num_rows > 0): ?>
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-striped table-hover ">
                     <thead>
                         <tr>
-                            <th>Barcode</th>
                             <th>Barcode 8-stellig</th>
                             <th>Abteilung</th>
                             <th>Fgst-Nr</th>
                             <th>Marke</th>
                             <th>Modell</th>
                             <th>Farbe</th>
-                            <th>Aufnahmebereich</th>
+                            <th>Aufnahme-bereich</th>
                             <th>Bild ersetzen</th>
                             <th>Aktionen</th>
                         </tr>
@@ -108,7 +114,6 @@ if (isset($_SESSION['success_message'])) {
                         <?php while ($vehicle = $vehicles->fetch_assoc()): ?>
                             <tr>
                                 <form class="vehicle-form" method="post" enctype="multipart/form-data">
-                                    <td><input type="text" class="form-control" name="barcode" value="<?php echo htmlspecialchars($vehicle['barcode']); ?>"></td>
                                     <td><input type="text" class="form-control" name="barcode8" value="<?php echo htmlspecialchars($vehicle['barcode8']); ?>"></td>
                                     <td>
                                         <select name="abteilung" class="form-control">
@@ -157,16 +162,25 @@ document.querySelectorAll('.vehicle-form').forEach(form => {
 
         const formData = new FormData(this);
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '../../controllers/VehicleController.php?action=update', true);
+        xhr.open('POST', '<?php echo BASE_URL; ?>controllers/VehicleController.php?action=update', true);
 
         xhr.onload = function () {
             if (xhr.status === 200) {
-                const successMessage = document.getElementById('success-message');
-                successMessage.textContent = "Das Fahrzeug wurde erfolgreich aktualisiert.";
-                successMessage.style.display = 'block';
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 3000);
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        const successMessage = document.getElementById('success-message');
+                        successMessage.textContent = response.message;
+                        successMessage.style.display = 'block';
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        alert('Fehler: ' + response.message);
+                    }
+                } catch (e) {
+                    console.error('Ungültige JSON-Antwort:', xhr.responseText);
+                }
             }
         };
 
@@ -180,7 +194,7 @@ document.querySelectorAll('.delete-vehicle').forEach(button => {
         if (confirm('Möchten Sie dieses Fahrzeug wirklich löschen?')) {
             const vehicleId = this.getAttribute('data-id');
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '../../controllers/VehicleController.php?action=delete', true);
+            xhr.open('POST', '<?php echo BASE_URL; ?>controllers/VehicleController.php?action=delete', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.onload = function () {
                 if (xhr.status === 200) {

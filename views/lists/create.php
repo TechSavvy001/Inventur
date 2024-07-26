@@ -1,27 +1,21 @@
 <?php
+// Konfigurationsdatei einbinden
+include_once __DIR__ . '/../../config/config.php';
+
 // Setze den Seitentitel auf "Neue Liste anlegen"
 $title = "Neue Liste anlegen";
 
 // Binde den Header ein, der wahrscheinlich den HTML-Kopfbereich und grundlegende Layouts enthält
-include '../layouts/header.php';
+include BASE_PATH . 'views/layouts/header.php';
 
 // Binde den ListController ein, um Listen zu verwalten
-include_once '../../controllers/ListController.php';
-
-// Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
-include_once '../../config/config.php';
+include_once BASE_PATH . 'controllers/ListController.php';
 
 // Starte die Session, falls sie noch nicht gestartet wurde
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Überprüfe, ob der Benutzer angemeldet ist
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    // Falls nicht, leite den Benutzer zur Login-Seite weiter
-    header('Location: ../../views/users/login.php');
-    exit;
-}
 
 // Initialisiere den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
@@ -39,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $liste_id = $listController->create($ansager, $schreiber, $filiale, $benutzer, $listeNummer);
     
     // Leite den Benutzer zur Seite "show.php" weiter und übergebe die Listen-ID
-    header("Location: show.php?liste_id=$liste_id");
+    header("Location: " . BASE_URL . "lists/show?liste_id=$liste_id");
     exit;
 } else {
     // Falls das Formular nicht abgesendet wurde, ermittle die nächste Listen-Nummer
@@ -60,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neue Liste anlegen</title>
-    <link rel="stylesheet" href="../../public/assets/css/css.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>public/assets/css/css.css">
 </head>
 <body>
 <div class="container-fluid mt-5" style="max-width: 90%; margin: 0 auto;">
@@ -71,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <div class="content bg-white p-4 rounded shadow-sm">
-                <form action="../../views/lists/create.php" method="post">
+                <form action="<?php echo BASE_URL; ?>lists/create" method="post">
                     <div class="form-group mb-3">
                         <label for="ansager">Ansager:</label>
                         <input type="text" class="form-control" id="ansager" name="ansager" required>

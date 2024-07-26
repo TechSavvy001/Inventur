@@ -1,6 +1,10 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // Einbinden der Konfigurations- und Modell-Dateien
-include_once dirname(__DIR__) . '/config/config.php';
+include_once dirname(__DIR__) . '/config/config.php'; 
 include_once dirname(__DIR__) . '/models/VehicleModel.php';
 
 // Definieren der Basis-URL, falls sie nicht bereits definiert ist
@@ -24,7 +28,7 @@ class VehicleController {
             header('Location: ../users/login.php');
             exit();
         }
-    
+
         // Überprüfen, ob die Anfrage eine POST-Anfrage ist
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Sammeln der Fahrzeugdaten aus dem POST-Array
@@ -41,17 +45,21 @@ class VehicleController {
                 'liste_id' => $_POST['liste_id'],
                 'bildPfad' => null
             ];
-    
+
+            // Speichern des Aufnahmebereichs in der Session
+            $_SESSION['last_aufnahmebereich'] = $_POST['aufnahmebereich'];
+
             // Überprüfen, ob das Fahrzeug bereits existiert
             if ($this->model->getVehicleByFgNummerFromFahrzeuge($data['fgNummer'])) {
-                echo "Fahrzeug mit dieser Fahrgestellnummer existiert bereits.";
+                $_SESSION['error_message'] = "Fahrzeug mit dieser Fahrgestellnummer existiert bereits.";
+                header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
                 exit();
             }
-    
+
             $imageUploaded = false; // Variable, um zu verfolgen, ob ein Bild hochgeladen wurde
             $uploadDir = dirname(__DIR__) . '/public/uploaded_files/'; // Absoluter Pfad zum Upload-Verzeichnis
             $relativeUploadDir = 'public/uploaded_files/'; // Relativer Pfad für die Datenbank
-    
+
             // Überprüfen, ob ein Base64-kodiertes Bild hochgeladen wurde
             if (!empty($_POST['bildData'])) {
                 $decoded_image = base64_decode(str_replace('data:image/png;base64,', '', $_POST['bildData']));
@@ -60,7 +68,9 @@ class VehicleController {
                     $data['bildPfad'] = $relativeUploadDir . $data['bildNummer'] . '.png';
                     $imageUploaded = true;
                 } else {
-                    echo "Fehler beim Speichern des Base64-Bildes.";
+                    $_SESSION['error_message'] = "Fehler beim Speichern des Base64-Bildes.";
+                    header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
+                    exit();
                 }
             } elseif (isset($_FILES['bild']) && $_FILES['bild']['error'] === UPLOAD_ERR_OK) {
                 // Überprüfen, ob ein Bild über das Formular hochgeladen wurde
@@ -68,7 +78,7 @@ class VehicleController {
                 $fileName = $_FILES['bild']['name'];
                 $fileNameCmps = explode(".", $fileName);
                 $fileExtension = strtolower(end($fileNameCmps));
-    
+
                 $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg');
                 if (in_array($fileExtension, $allowedfileExtensions)) {
                     $dest_path = $uploadDir . $data['bildNummer'] . '.' . $fileExtension;
@@ -76,15 +86,24 @@ class VehicleController {
                         $data['bildPfad'] = $relativeUploadDir . $data['bildNummer'] . '.' . $fileExtension;
                         $imageUploaded = true;
                     } else {
-                        echo "Fehler beim Verschieben des hochgeladenen Bildes.";
+                        $_SESSION['error_message'] = "Fehler beim Verschieben des hochgeladenen Bildes.";
+                        header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
+                        exit();
                     }
                 } else {
-                    echo "Ungültige Dateierweiterung: $fileExtension";
+                    $_SESSION['error_message'] = "Ungültige Dateierweiterung: $fileExtension";
+                    header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
+                    exit();
                 }
-            } else {
-                echo "Kein Bild hochgeladen.";
             }
-    
+
+            // Falls kein Bild hochgeladen wurde
+            if (!$imageUploaded) {
+                $_SESSION['error_message'] = "Es muss ein Bild gemacht werden, bevor das Fahrzeug gespeichert werden kann.";
+                header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
+                exit();
+            }
+
             // Fahrzeugdaten in der Datenbank speichern
             if ($this->model->createVehicle($data)) {
                 if ($_POST['action'] == 'save_new') {
@@ -96,7 +115,9 @@ class VehicleController {
                 }
                 exit();
             } else {
-                echo "Fehler: " . $this->model->getError();
+                $_SESSION['error_message'] = "Fehler: " . $this->model->getError();
+                header("Location: ../views/vehicles/create.php?liste_id=" . $_POST['liste_id']);
+                exit();
             }
         }
     }
@@ -104,20 +125,19 @@ class VehicleController {
     // Methode zum Aktualisieren eines Fahrzeugs
     public function update() {
         session_start();
-        include '../../config/config.php';
 
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Sammeln der Fahrzeugdaten aus dem POST-Array
             $data = [
-                'id' => $_POST['id'],
-                'barcode' => trim($_POST['barcode']),
-                'barcode8' => trim($_POST['barcode8']),
-                'abteilung' => trim($_POST['abteilung']),
-                'fgNummer' => trim($_POST['fgNummer']),
-                'marke' => trim($_POST['marke']),
-                'modell' => trim($_POST['modell']),
-                'farbe' => trim($_POST['farbe']),
-                'aufnahmebereich' => trim($_POST['aufnahmebereich']),
+                'id' => isset($_POST['id']) ? trim($_POST['id']) : null,
+                'barcode' => isset($_POST['barcode']) ? trim($_POST['barcode']) : '',
+                'barcode8' => isset($_POST['barcode8']) ? trim($_POST['barcode8']) : '',
+                'abteilung' => isset($_POST['abteilung']) ? trim($_POST['abteilung']) : '',
+                'fgNummer' => isset($_POST['fgNummer']) ? trim($_POST['fgNummer']) : '',
+                'marke' => isset($_POST['marke']) ? trim($_POST['marke']) : '',
+                'modell' => isset($_POST['modell']) ? trim($_POST['modell']) : '',
+                'farbe' => isset($_POST['farbe']) ? trim($_POST['farbe']) : '',
+                'aufnahmebereich' => isset($_POST['aufnahmebereich']) ? trim($_POST['aufnahmebereich']) : '',
                 'bildPfad' => null
             ];
 
@@ -143,11 +163,15 @@ class VehicleController {
 
             // Fahrzeugdaten in der Datenbank aktualisieren
             if ($this->model->updateVehicle($data)) {
-                header("Location: ../lists/show.php?liste_id=" . $_POST['liste_id']);
-                exit();
+                $_SESSION['success_message'] = "Das Fahrzeug wurde erfolgreich aktualisiert.";
+                // Rückmeldung an den Client senden
+                header('Content-Type: application/json'); // Stelle sicher, dass der Content-Type Header gesetzt ist
+                echo json_encode(['success' => true, 'message' => "Das Fahrzeug wurde erfolgreich aktualisiert."]);
             } else {
-                echo "Fehler: " . $this->model->getError();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => "Fehler: " . $this->model->getError()]);
             }
+            exit();
         } else {
             echo "Ungültige Anfrage";
         }
@@ -222,6 +246,11 @@ class VehicleController {
             }
         }
     }
+
+    public function showImages() {
+        $vehicles = $this->model->getVehiclesWithListNumber();
+        include '../views/images/index.php';
+    }
 }
 
 // Instanziieren des VehicleControllers und Ausführen der entsprechenden Methode basierend auf der Aktion
@@ -241,6 +270,8 @@ if (isset($_GET['action'])) {
         case 'delete':
             $controller->delete();
             break;
+        case 'showImages':
+            $controller->showImages();
+            break;
     }
 }
-?>
