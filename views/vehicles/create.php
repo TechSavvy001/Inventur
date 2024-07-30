@@ -67,7 +67,7 @@ $last_aufnahmebereich = isset($_SESSION['last_aufnahmebereich']) ? $_SESSION['la
         #scanner, #video {
             position: relative;
             width: 100%;
-            height: 500px; /* Erhöht die Höhe des Scanner- und Videoelements */
+            height: 500px;
         }
         #canvas {
             display: none;

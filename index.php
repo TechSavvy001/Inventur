@@ -22,6 +22,12 @@ $request_uri = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
 // Entferne die BASE_URL vom Anfang der angeforderten URI
 $request_uri = str_replace(BASE_URL, '', $request_uri);
 
+// Debugging: Ausgabe der angeforderten URI
+error_log("Request URI: " . $request_uri);
+
+// Debugging: Ausgabe der Routing-Tabelle
+error_log("Routes: " . print_r($routes, true));
+
 // Überprüfen, ob die angeforderte URL in der Routing-Tabelle existiert
 if (array_key_exists($request_uri, $routes)) {
     // Dateipfad aus der Routing-Tabelle holen
@@ -33,11 +39,11 @@ if (array_key_exists($request_uri, $routes)) {
     } else {
         // Datei nicht gefunden
         header("HTTP/1.0 404 Not Found");
-        echo "404 Not Found";
+        echo "404 Not Found - File does not exist";
     }
 } else {
     // Wenn die Route nicht gefunden wird, eine 404-Fehlerseite anzeigen oder weiterleiten
     header("HTTP/1.0 404 Not Found");
-    echo "404 Not Found";
+    echo "404 Not Found - Route not found";
     exit;
 }

@@ -5,7 +5,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
 include_once dirname(__DIR__, 2) . '/config/config.php';
 
-$base_url = rtrim(BASE_URL, '/') . '/'; 
+$base_url = rtrim(BASE_URL, '/') . '/';
 
 // Überprüfe, ob der Benutzer angemeldet ist
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
@@ -14,7 +14,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 
-
+$role = $_SESSION['role']; // Benutzerrolle aus der Session abrufen
 ?>
 
 <!DOCTYPE html>
@@ -48,6 +48,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     <li class="nav-item">
                         <a class="nav-link" href="<?php echo $base_url; ?>images">Bilder</a>
                     </li>
+                    <?php if ($role == 'Admin'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo $base_url; ?>manage">Benutzerverwaltung</a>
+                        </li>
+                    <?php endif; ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?php echo $base_url; ?>logout">Logout</a>
                     </li>

@@ -1,23 +1,38 @@
 <?php
 // Startet die Session, falls noch nicht geschehen
 session_start();
+
+// Überprüfe, ob die PHP-Sitzung noch nicht gestartet wurde, und starte sie, falls nötig
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Überprüfe, ob der Benutzer eingeloggt ist
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    // Wenn der Benutzer nicht eingeloggt ist, leite ihn zur Login-Seite weiter
+    header('Location: ' . BASE_URL . 'views/users/login.php');
+    exit;
+}
+
 $title = "Gespeicherte Bilder";
 include_once __DIR__ . '/../../config/config.php';
 include BASE_PATH . 'views/layouts/header.php';
 
+// Benutzername aus der Session abrufen
+$username = $_SESSION['username'];
 
-
-// Datenbankverbindung herstellen
-$conn = new PDO('mysql:host=localhost;dbname=inventur', 'root', '');
-
-// SQL-Abfrage, um alle Bildnummern und Fahrzeugdetails abzurufen
+// SQL-Abfrage, um alle Bildnummern und Fahrzeugdetails des aktuellen Benutzers abzurufen
 $sql = "SELECT l.listeNummer, f.bildPfad, f.barcode8, f.fgNummer, f.marke, f.modell, f.farbe 
         FROM fahrzeuge f
         JOIN listen l ON f.liste_id = l.id
+        WHERE l.benutzer = ?
         ORDER BY l.listeNummer";
+
 $stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $username);
 $stmt->execute();
-$vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+$vehicles = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>

@@ -28,9 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Initialisiert den UserController mit der Datenbankverbindung
         $userController = new UserController($conn);
 
-        // Debugging-Ausgabe hinzufügen
-        error_log("Attempting to log in user: $username");
-
         // Versucht, den Benutzer anzumelden und speichert die Rückmeldung (Fehler- oder Erfolgsmeldung) in $message
         $message = $userController->login($username, $password);
 
@@ -61,18 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <h1>Login</h1>
                 </div>
                 <div class="content bg-white p-4 rounded shadow-sm">
-                <form action="<?php echo BASE_URL; ?>views/users/login.php" method="post">
-                    <input type="hidden" name="token" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
-                    <div class="form-group mb-3">
-                        <label for="username">Benutzername:</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="password">Passwort:</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
+                    <form action="" method="post">
+                        <input type="hidden" name="token" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
+                        <div class="form-group mb-3">
+                            <label for="username">Benutzername:</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="password">Passwort:</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
                     <?php if (!empty($message)): ?>
                         <p class="alert alert-danger mt-3"><?php echo $message; ?></p>
                     <?php endif; ?>

@@ -3,7 +3,7 @@
 session_start();
 
 // Binde die Konfigurationsdatei ein, die die Datenbankverbindung enthält
-include_once BASE_PATH . 'config/config.php';
+include_once __DIR__ . '/../../config/config.php';
 
 // Setzt den Seitentitel auf "Listen Übersicht"
 $title = "Listen Übersicht";
@@ -17,8 +17,9 @@ include_once BASE_PATH . 'controllers/ListController.php';
 // Initialisiert den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
 
-// Holt den Benutzernamen aus der Session
+// Holt den Benutzernamen und die Rolle aus der Session
 $username = $_SESSION['username'];
+$role = $_SESSION['role'];
 
 // Holt alle Listen, die dem Benutzer gehören
 $lists = $listController->getAll($username);
@@ -35,7 +36,6 @@ if (isset($_SESSION['error_message'])) {
     unset($_SESSION['error_message']);
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="de">
@@ -72,6 +72,9 @@ if (isset($_SESSION['error_message'])) {
         <div class="col-12">
             <div class="menubar bg-white shadow-sm py-2 px-4">
                 <h1>Listen Übersicht</h1>
+                <?php if ($role == 'Admin'): ?>
+                    <a href="<?php echo BASE_URL; ?>views/users/manage.php" class="btn btn-primary">Benutzerverwaltung</a>
+                <?php endif; ?>
             </div>
 
             <div class="content bg-white p-4 rounded shadow-sm mt-4">

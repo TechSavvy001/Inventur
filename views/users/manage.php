@@ -6,10 +6,6 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Zeigt alle Fehler an
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Setzt den Seitentitel auf "Benutzerverwaltung"
 $title = "Benutzerverwaltung";
 
@@ -25,13 +21,20 @@ if (!defined('BASE_URL')) {
 
 // Überprüfe, ob der Benutzer angemeldet ist
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    // Falls nicht, leite den Benutzer zur Login-Seite weiter
     header('Location: ' . BASE_URL . 'views/users/login.php');
+    exit;
+}
+
+// Überprüfe, ob der Benutzer ein Administrator ist
+if ($_SESSION['role'] !== 'Admin') {
+    header('Location: ' . BASE_URL . 'lists/start');
     exit;
 }
 
 // Bindet die Konfigurationsdatei ein, die die Datenbankverbindung enthält
 include_once BASE_PATH . 'config/config.php';
+
+include BASE_PATH . 'views/layouts/header.php';
 
 // Bindet den UserController ein, um Benutzeraktionen zu verwalten
 include_once BASE_PATH . 'controllers/UserController.php';
@@ -43,42 +46,41 @@ $userController = new UserController($conn);
 $message = '';
 
 // Benutzer hinzufügen
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
-    echo "<pre>";
-    print_r($_POST);
-    echo "</pre>";
-
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    if ($userController->addUser($username, $password)) {
-        $message = "<p class='alert alert-success'>Benutzer erfolgreich hinzugefügt</p>";
-    } else {
-        $message = "<p class='alert alert-danger'>Fehler: Benutzer konnte nicht hinzugefügt werden.</p>";
+// Überprüfe, ob ein Formular gesendet wurde
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Hinzufügen eines neuen Benutzers
+    if ($_POST['action'] === 'add') {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+        $role = $_POST['role'];
+        if ($userController->addUser($username, $password, $role)) {
+            $message = 'Benutzer erfolgreich hinzugefügt!';
+        } else {
+            $message = 'Fehler beim Hinzufügen des Benutzers!';
+        }
     }
-}
 
-// Benutzer löschen
-if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-
-    if ($userController->deleteUser($id)) {
-        $message = "<p class='alert alert-success'>Benutzer erfolgreich gelöscht</p>";
-    } else {
-        $message = "<p class='alert alert-danger'>Fehler: Benutzer konnte nicht gelöscht werden.</p>";
+    // Bearbeiten eines Benutzers
+    elseif ($_POST['action'] === 'update') {
+        $id = $_POST['id'];
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+        $role = $_POST['role'];
+        if ($userController->updateUser($id, $username, $password, $role)) {
+            $message = 'Benutzer erfolgreich bearbeitet!';
+        } else {
+            $message = 'Fehler beim Bearbeiten des Benutzers!';
+        }
     }
-}
 
-// Benutzer aktualisieren
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update') {
-    $id = $_POST['id'];
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    if ($userController->updateUser($id, $username, $password)) {
-        $message = "<p class='alert alert-success'>Benutzer erfolgreich aktualisiert</p>";
-    } else {
-        $message = "<p class='alert alert-danger'>Fehler: Benutzer konnte nicht aktualisiert werden.</p>";
+    // Löschen eines Benutzers
+    elseif ($_POST['action'] === 'delete') {
+        $id = $_POST['id'];
+        if ($userController->deleteUser($id)) {
+            $message = 'Benutzer erfolgreich gelöscht!';
+        } else {
+            $message = 'Fehler beim Löschen des Benutzers!';
+        }
     }
 }
 
@@ -99,7 +101,7 @@ $users = $userController->getAllUsers();
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>public/assets/css/css.css">
 </head>
 <body>
-<div class="container-fluid mt-5" style="max-width: 90%; margin: 0 auto;">
+<div class="container mt-5">
     <div class="menubar bg-white shadow-sm py-2 px-4">
         <h1 class="h11">Benutzerverwaltung</h1>
     </div>
@@ -109,8 +111,9 @@ $users = $userController->getAllUsers();
     <div class="content mt-4">
         <div class="header p-3 mb-4 bg-white rounded shadow-sm">
             <h2>Neuen Benutzer hinzufügen</h2>
-            <form action="<?php echo BASE_URL; ?>views/users/manage.php" method="post">
-            <input type="hidden" name="action" value="add">
+            <form action="<?php echo BASE_URL; ?>manage" method="post">
+
+                <input type="hidden" name="action" value="add">
                 <div class="form-group">
                     <label for="username">Benutzername:</label>
                     <input type="text" class="form-control" id="username" name="username" required>
@@ -118,6 +121,13 @@ $users = $userController->getAllUsers();
                 <div class="form-group">
                     <label for="password">Passwort:</label>
                     <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Rolle:</label>
+                    <select class="form-control" id="role" name="role" required>
+                        <option value="Mitarbeiter">Mitarbeiter</option>
+                        <option value="Admin">Admin</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-primary">Hinzufügen</button>
             </form>
@@ -131,22 +141,37 @@ $users = $userController->getAllUsers();
                             <thead>
                                 <tr>
                                     <th>Benutzername</th>
+                                    <th>Rolle</th>
+                                    <th>Passwort</th>
                                     <th>Aktionen</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($users as $user): ?>
                                     <tr>
-                                        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
+                                        <form action="<?php echo BASE_URL; ?>manage" method="post">
+
                                             <td><input type="text" class="form-control" name="username" value="<?php echo htmlspecialchars($user['username']); ?>"></td>
+                                            <td>
+                                                <select class="form-control" name="role" required>
+                                                    <option value="Mitarbeiter" <?php if($user['role'] == 'Mitarbeiter') echo 'selected'; ?>>Mitarbeiter</option>
+                                                    <option value="Admin" <?php if($user['role'] == 'Admin') echo 'selected'; ?>>Admin</option>
+                                                </select>
+                                            </td>
                                             <td><input type="password" class="form-control" name="password" placeholder="Neues Passwort eingeben"></td>
                                             <td>
                                                 <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
                                                 <input type="hidden" name="action" value="update">
                                                 <button type="submit" class="btn btn-success btn-sm">Speichern</button>
-                                                <a href="manage.php?delete=<?php echo $user['id']; ?>" onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')" class="btn btn-danger btn-sm">Löschen</a>
-                                            </td>
                                         </form>
+                                        <!-- Separates Formular für den Lösch-Button -->
+                                        <form action="<?php echo BASE_URL; ?>manage" method="post" style="display:inline;">
+
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')">Löschen</button>
+                                        </form>
+                                            </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
