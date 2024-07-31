@@ -72,9 +72,7 @@ if (isset($_SESSION['error_message'])) {
         <div class="col-12">
             <div class="menubar bg-white shadow-sm py-2 px-4">
                 <h1>Listen Übersicht</h1>
-                <?php if ($role == 'Admin'): ?>
-                    <a href="<?php echo BASE_URL; ?>views/users/manage.php" class="btn btn-primary">Benutzerverwaltung</a>
-                <?php endif; ?>
+                
             </div>
 
             <div class="content bg-white p-4 rounded shadow-sm mt-4">
@@ -107,6 +105,10 @@ if (isset($_SESSION['error_message'])) {
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
+                        <div class="mt-4">
+                        <a href="<?php echo BASE_URL; ?>lists/start" class="btn btn-primary">Zurück</a>
+                    </div>
+
                     </div>
                 <?php else: ?>
                     <p class="alert alert-warning">Keine Listen gefunden.</p>

@@ -82,8 +82,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <label for="listeNummer">Listen Nummer:</label>
                         <input type="text" class="form-control" id="listeNummer" name="listeNummer" value="<?php echo htmlspecialchars($neueListeNummer); ?>" readonly>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Speichern</button>
+                    <button type="submit" class="btn btn-secondary w-100">Speichern</button>
                 </form>
+                <div class="mt-4">
+                        <a href="<?php echo BASE_URL; ?>lists/start" class="btn btn-primary">Zurück</a>
+                    </div>
+
             </div>
         </div>
     </div>

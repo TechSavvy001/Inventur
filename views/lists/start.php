@@ -5,8 +5,6 @@ $title = "Start";
     // Binde die Konfigurationsdatei ein, die wahrscheinlich die Datenbankverbindung enthält
     include_once __DIR__ . '/../../config/config.php';
         
-
-
 // Binde die Header-Datei ein, die wahrscheinlich den HTML-Kopfbereich enthält
 include BASE_PATH . 'views/layouts/header.php';
 ?>

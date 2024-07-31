@@ -15,6 +15,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 $role = $_SESSION['role']; // Benutzerrolle aus der Session abrufen
+$username = $_SESSION['username']; // Benutzername aus der Session abrufen
+
 ?>
 
 <!DOCTYPE html>
@@ -40,8 +42,11 @@ $role = $_SESSION['role']; // Benutzerrolle aus der Session abrufen
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            <span class="navbar-text ms-auto d-lg-none">
+                Hallo <b><?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?></b>!
+            </span>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="<?php echo $base_url; ?>lists/start">Aktion wählen</a>
                     </li>
@@ -57,6 +62,10 @@ $role = $_SESSION['role']; // Benutzerrolle aus der Session abrufen
                         <a class="nav-link" href="<?php echo $base_url; ?>logout">Logout</a>
                     </li>
                 </ul>
+                    <span class="navbar-text ms-auto d-none d-lg-inline" style="display: flex; align-items: center;">
+                        Hallo <b><?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?></b>!
+                        <img src="<?php echo $base_url; ?>public/assets/images/bmwIcon.svg" alt="User Image" class="rounded-circle" style="width: 20px; height: 20px; margin-left: 5px;">
+                </span>
             </div>
         </div>
     </nav>

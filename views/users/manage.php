@@ -176,6 +176,10 @@ $users = $userController->getAllUsers();
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                        <div class="mt-4">
+                        <a href="<?php echo BASE_URL; ?>lists/start" class="btn btn-primary">Zurück</a>
+                    </div>
+
                     </div>
                 <?php else: ?>
                     <p class="alert alert-warning">Keine Benutzer gefunden.</p>
