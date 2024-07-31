@@ -14,37 +14,36 @@ class ListController {
         $this->vehicleModel = new VehicleModel($db);
     }
 
-    // Methode zum Erstellen einer neuen Liste
-    public function create($ansager, $schreiber, $filiale, $benutzer, $listeNummer) {
-        return $this->listModel->create($ansager, $schreiber, $filiale, $benutzer, $listeNummer);
-    }
+ // Methode zum Erstellen einer neuen Liste
+ public function create($ansager, $schreiber, $filiale, $benutzer) {
+    return $this->listModel->create($ansager, $schreiber, $filiale, $benutzer);
+}
 
-    // Methode zur Verarbeitung eines Create-Requests
-    public function handleCreateRequest() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {  // Überprüfen, ob es sich um einen POST-Request handelt
-            if (session_status() == PHP_SESSION_NONE) {
-                session_start();  // Sitzung starten, falls noch nicht gestartet
-            }
-            if (!isset($_SESSION['username'])) {  // Überprüfen, ob der Benutzer eingeloggt ist
-                header('Location: ' . BASE_URL . 'views/users/login.php');
-                exit;
-            }
-            // POST-Daten abrufen
-            $benutzer = $_SESSION['username'];
-            $ansager = $_POST['ansager'];
-            $schreiber = $_POST['schreiber'];
-            $filiale = $_POST['filiale'];
-            $listeNummer = $_POST['listeNummer'];
-
-            // Neue Liste erstellen und zur Detailansicht weiterleiten
-            $liste_id = $this->create($ansager, $schreiber, $filiale, $benutzer, $listeNummer);
-            header("Location: " . BASE_URL . "views/lists/show.php?liste_id=$liste_id");
-            exit();
-        } else {
-            include BASE_PATH . 'views/lists/create.php';  // Formular anzeigen, wenn es kein POST-Request ist
+// Methode zur Verarbeitung eines Create-Requests
+public function handleCreateRequest() {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {  // Überprüfen, ob es sich um einen POST-Request handelt
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();  // Sitzung starten, falls noch nicht gestartet
         }
-    }
+        if (!isset($_SESSION['username'])) {  // Überprüfen, ob der Benutzer eingeloggt ist
+            header('Location: ' . BASE_URL . 'views/users/login.php');
+            exit;
+        }
+        // POST-Daten abrufen
+        $benutzer = $_SESSION['username'];
+        $ansager = $_POST['ansager'];
+        $schreiber = $_POST['schreiber'];
+        $filiale = $_POST['filiale'];
 
+        // Neue Liste erstellen und zur Detailansicht weiterleiten
+        $liste_id = $this->create($ansager, $schreiber, $filiale, $benutzer);
+        header("Location: " . BASE_URL . "views/lists/show.php?liste_id=$liste_id");
+        exit();
+    } else {
+        include BASE_PATH . 'views/lists/create.php';  // Formular anzeigen, wenn es kein POST-Request ist
+    }
+}
+    
     // Methode zum Abrufen der Details einer Liste anhand der ID
     public function getListDetails($liste_id) {
         return $this->listModel->getById($liste_id);

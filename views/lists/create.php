@@ -16,7 +16,6 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-
 // Initialisiere den ListController mit der Datenbankverbindung
 $listController = new ListController($conn);
 
@@ -27,24 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $schreiber = $_POST['schreiber'];
     $filiale = $_POST['filiale'];
     $benutzer = $_SESSION['username']; // Angemeldeter Benutzer
-    $listeNummer = $_POST['listeNummer'];
 
     // Erstelle eine neue Liste und speichere die ID der neu erstellten Liste
-    $liste_id = $listController->create($ansager, $schreiber, $filiale, $benutzer, $listeNummer);
-    
+    $liste_id = $listController->create($ansager, $schreiber, $filiale, $benutzer);
+
     // Leite den Benutzer zur Seite "show.php" weiter und übergebe die Listen-ID
     header("Location: " . BASE_URL . "lists/show?liste_id=$liste_id");
     exit;
-} else {
-    // Falls das Formular nicht abgesendet wurde, ermittle die nächste Listen-Nummer
-    $username = $_SESSION['username'];
-    $sql = "SELECT MAX(listeNummer) AS maxListeNummer FROM listen WHERE benutzer = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $neueListeNummer = $row['maxListeNummer'] + 1;
 }
 ?>
 
@@ -78,16 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <label for="filiale">Filiale:</label>
                         <input type="text" class="form-control" id="filiale" name="filiale" required>
                     </div>
-                    <div class="form-group mb-3">
-                        <label for="listeNummer">Listen Nummer:</label>
-                        <input type="text" class="form-control" id="listeNummer" name="listeNummer" value="<?php echo htmlspecialchars($neueListeNummer); ?>" readonly>
-                    </div>
                     <button type="submit" class="btn btn-secondary w-100">Speichern</button>
                 </form>
                 <div class="mt-4">
-                        <a href="<?php echo BASE_URL; ?>lists/start" class="btn btn-primary">Zurück</a>
-                    </div>
-
+                    <a href="<?php echo BASE_URL; ?>lists/start" class="btn btn-primary">Zurück</a>
+                </div>
             </div>
         </div>
     </div>

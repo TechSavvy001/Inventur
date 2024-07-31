@@ -7,17 +7,25 @@ class ListModel {
         $this->conn = $conn;
     }
 
-    // Methode zum Erstellen eines neuen Eintrags in der Tabelle "listen"
-    public function create($ansager, $schreiber, $filiale, $benutzer, $listeNummer) {
-        $sql = "INSERT INTO listen (ansager, schreiber, filiale, benutzer, listeNummer) VALUES (?, ?, ?, ?, ?)";
-        // Bereite die SQL-Anweisung vor, um SQL-Injections zu verhindern
-        $stmt = $this->conn->prepare($sql);
-        // Binde die Parameter an die vorbereitete Anweisung
-        $stmt->bind_param("ssssi", $ansager, $schreiber, $filiale, $benutzer, $listeNummer);
-        // Führe die Anweisung aus
-        $stmt->execute();
-        // Gib die ID des neu erstellten Eintrags zurück
-        return $stmt->insert_id;
+// Methode zum Erstellen eines neuen Eintrags in der Tabelle "listen"
+public function create($ansager, $schreiber, $filiale, $benutzer) {
+    // Erstellen der neuen Liste ohne listeNummer
+    $sql = "INSERT INTO listen (ansager, schreiber, filiale, benutzer) VALUES (?, ?, ?, ?)";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("ssss", $ansager, $schreiber, $filiale, $benutzer);
+    $stmt->execute();
+
+    // Abrufen der ID der neu erstellten Liste
+    $insert_id = $stmt->insert_id;
+
+    // Aktualisieren der listeNummer mit der gleichen ID
+    $update_sql = "UPDATE listen SET listeNummer = ? WHERE id = ?";
+    $update_stmt = $this->conn->prepare($update_sql);
+    $update_stmt->bind_param("ii", $insert_id, $insert_id);
+    $update_stmt->execute();
+
+    // Rückgabe der ID der neu erstellten Liste
+    return $insert_id;
     }
 
     // Methode, um alle Listen eines bestimmten Benutzers abzurufen
