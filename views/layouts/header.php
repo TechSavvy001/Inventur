@@ -64,7 +64,6 @@ $username = $_SESSION['username']; // Benutzername aus der Session abrufen
                 </ul>
                     <span class="navbar-text ms-auto d-none d-lg-inline" style="display: flex; align-items: center;">
                         Hallo <b><?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?></b>!
-                        <img src="<?php echo $base_url; ?>public/assets/images/bmwIcon.svg" alt="User Image" class="rounded-circle" style="width: 20px; height: 20px; margin-left: 5px;">
                 </span>
             </div>
         </div>
